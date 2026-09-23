@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PHPadventure — aprenda Laravel jogando</title>
+<meta name="description" content="Estude Laravel, MVC, Eloquent e Blade num quiz com clima de fazenda pixelada." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐘</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Nunito:ital,wght@0,400;0,600;0,800;1,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand" data-nav="home">
+      <span class="brand-emoji">🐘</span>
+      <span class="brand-text">PHP<span class="brand-accent">adventure</span></span>
+    </div>
+    <nav id="topicNav" class="topic-nav" aria-label="Trilhas de estudo"></nav>
+    <button id="menuToggle" class="menu-toggle" aria-label="Abrir menu de trilhas">☰</button>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="site-footer">
+    <p>Feito com 🌾 para revisar Laravel, PHP e MySQL antes da prova — bons estudos!</p>
+  </footer>
+
+  <!-- Modal de resultado da resposta -->
+  <div id="resultModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <button id="closeModal" class="modal-close" aria-label="Fechar">✕</button>
+
+      <div class="modal-reaction">
+        <img id="reactionImg" src="" alt="" />
+        <p id="reactionTitle" class="reaction-title"></p>
+        <p id="reactionText" class="reaction-text"></p>
+      </div>
+
+      <div class="modal-curiosity">
+        <img src="assets/elephant-curious.png" alt="Elefante curioso" class="curious-img" />
+        <div>
+          <p class="curiosity-label">Curiosidade da questão</p>
+          <p id="curiosityText" class="curiosity-text"></p>
+        </div>
+      </div>
+
+      <button id="nextBtn" class="btn btn-primary btn-block">Continuar a jornada →</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
