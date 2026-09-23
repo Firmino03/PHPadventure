@@ -28,7 +28,7 @@ function buildNav() {
     const btn = document.createElement("button");
     btn.className = "topic-btn";
     btn.dataset.topic = t.id;
-    btn.innerHTML = `<span>${t.icon}</span><span>${t.label}</span>`;
+    btn.innerHTML = `<span class="btn-icon">${t.icon}</span><span>${t.label}</span>`;
     btn.addEventListener("click", () => {
       startQuiz(t.id);
       topicNav.classList.remove("open");
