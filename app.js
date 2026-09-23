@@ -67,7 +67,7 @@ function renderHome() {
     </section>
 
     <section class="panel story" style="margin-top:18px;">
-      <h2 style="margin-top:0;color:var(--wood-dark);">Antes de plantar, vamos conhecer o terreno</h2>
+      <h2 style="margin-top:0;color:var(--purple-800);">Antes de plantar, vamos conhecer o terreno</h2>
 
       <div class="story-card">
         <h3>🐘 Você sabe o que é PHP?</h3>
@@ -101,7 +101,7 @@ function renderHome() {
     </section>
 
     <section class="panel" style="margin-top:18px;">
-      <h2 style="margin-top:0;color:var(--wood-dark);">Escolha uma trilha para estudar</h2>
+      <h2 style="margin-top:0;color:var(--purple-800);">Escolha uma trilha para estudar</h2>
       <div class="topics-grid">
         ${TOPICS.map(
           (t) => `
