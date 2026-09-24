@@ -19,9 +19,9 @@
   --lime-soft:   #f2f7de;
 
   --ink:         #2f1f3d;
-  --ink-soft:    #71617c;
+  --ink-soft:    #000000;
   --white:       #ffffff;
-  --page-bg:     #fdf7fa;
+  --page-bg:     #E1B7ED;
 
   --radius-lg: 24px;
   --radius-md: 18px;
@@ -61,7 +61,7 @@ button { font: inherit; }
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(253, 247, 250, 0.92);
+  background: rgba(245, 177, 211, 0.92);
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 16px rgba(47, 31, 61, 0.08);
   border-bottom: 1px solid var(--lilac-soft);
