@@ -61,10 +61,10 @@ button { font: inherit; }
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(245, 177, 211, 0.92);
+  background: #6f8f22(245, 177, 211, 0.92);
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 16px rgba(47, 31, 61, 0.08);
-  border-bottom: 1px solid var(--lilac-soft);
+  border-bottom: 2px solid var(--lilac-soft);
 }
 
 .topbar-inner {
@@ -441,7 +441,7 @@ button { font: inherit; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(47, 31, 61, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -585,7 +585,7 @@ button { font: inherit; }
 .footer-btn span { font-size: 1.1rem; }
 .footer-btn:hover { transform: translateY(-2px); background: var(--lilac-soft); }
 .footer-btn-accent { background: var(--rose); color: var(--white); }
-.footer-btn-accent:hover { background: #ea6ba3; }
+.footer-btn-accent:hover { background: #6f8f22; }
 
 @media (max-width: 640px) {
   .footer-inner { flex-direction: column; text-align: center; }
