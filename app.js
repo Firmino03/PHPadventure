@@ -50,69 +50,74 @@ menuToggle.addEventListener("click", () => topicNav.classList.toggle("open"));
 
 function renderHome() {
   setActiveNav(null);
+  const totalQuestions = Object.values(QUESTIONS).reduce((sum, arr) => sum + arr.length, 0);
+
   app.innerHTML = `
-    <section class="panel hero">
-      <div class="hero-text">
+    <div class="bento-grid">
+
+      <section class="bento-cell hero-cell">
         <span class="eyebrow">Guia de estudos interativo</span>
-        <h1>Bem-vindo à fazenda do PHP 🌾</h1>
+        <h1>Bem-vindo ao PHPadventure</h1>
         <p>
-          Este é o <strong>PHPadventure</strong>: um jeito de revisar Laravel, PHP e MySQL
-          antes da prova, respondendo às perguntas que o professor passou — trilha por trilha,
-          no seu ritmo. Escolha um assunto no cabeçalho e comece a colher conhecimento!
+          Um jeito de revisar Laravel, PHP e MySQL antes da prova, respondendo às perguntas
+          que o professor passou — trilha por trilha, no seu ritmo. Escolha um assunto abaixo
+          e comece a estudar.
         </p>
-      </div>
-      <div class="hero-elephant">
+      </section>
+
+      <section class="bento-cell hero-image-cell">
         <img src="assets/elephant-happy.png" alt="Elefante do PHP feliz, mascote do site" />
-      </div>
-    </section>
+      </section>
 
-    <section class="panel story" style="margin-top:18px;">
-      <h2 style="margin-top:0;color:var(--purple-800);">Antes de plantar, vamos conhecer o terreno</h2>
+      <section class="bento-cell stat-cell">
+        <span class="stat-number">${TOPICS.length}</span>
+        <span class="stat-label">trilhas de estudo</span>
+      </section>
 
-      <div class="story-card">
+      <section class="bento-cell stat-cell stat-cell-accent">
+        <span class="stat-number">${totalQuestions}</span>
+        <span class="stat-label">perguntas no total</span>
+      </section>
+
+      <h2 class="bento-section-title">Antes de plantar, vamos conhecer o terreno</h2>
+
+      <section class="bento-cell story-cell">
         <h3>🐘 Você sabe o que é PHP?</h3>
         <p>
           PHP é a linguagem que roda por trás da página: é ela quem lê o pedido do navegador,
-          conversa com o banco de dados e decide o que vai aparecer na tela. Pense nela como
-          o fazendeiro que cuida de tudo nos bastidores antes de entregar a colheita pronta
-          para quem está do outro lado da cerca.
+          conversa com o banco de dados e decide o que vai aparecer na tela.
         </p>
-      </div>
+      </section>
 
-      <div class="story-card">
+      <section class="bento-cell story-cell">
         <h3>🧰 E o Laravel?</h3>
         <p>
-          Laravel é um <em>framework</em> feito em PHP — ou seja, uma fazenda já organizada,
-          com celeiro, cercas e trilhas prontas, para você não precisar erguer tudo do zero.
-          Ele te dá convenções e ferramentas (rotas, Models, Migrations, Blade...) para organizar
-          o código em vez de espalhar tudo pelo campo.
+          Laravel é um <em>framework</em> feito em PHP: convenções e ferramentas prontas
+          (rotas, Models, Migrations, Blade...) para organizar o código em vez de espalhar
+          tudo pelo projeto.
         </p>
-      </div>
+      </section>
 
-      <div class="story-card">
+      <section class="bento-cell story-cell">
         <h3>🪣 E o MySQL?</h3>
         <p>
-          MySQL é o banco de dados: o celeiro onde tudo fica guardado — livros, autores,
-          categorias, pedidos. O Laravel (através do Eloquent) é quem vai até esse celeiro
-          buscar e organizar o que for preciso, sem você precisar escrever SQL na mão o tempo
-          todo.
+          MySQL é o banco de dados onde tudo fica guardado. O Laravel, através do Eloquent,
+          busca e organiza o que for preciso sem você escrever SQL na mão o tempo todo.
         </p>
-      </div>
-    </section>
+      </section>
 
-    <section class="panel" style="margin-top:18px;">
-      <h2 style="margin-top:0;color:var(--purple-800);">Escolha uma trilha para estudar</h2>
-      <div class="topics-grid">
-        ${TOPICS.map(
-          (t) => `
-          <button class="topic-card" data-topic="${t.id}">
-            <div class="tc-icon">${t.icon}</div>
-            <div class="tc-label">${t.label}</div>
-            <div class="tc-count">${QUESTIONS[t.id].length} perguntas</div>
-          </button>`
-        ).join("")}
-      </div>
-    </section>
+      <h2 class="bento-section-title">Escolha uma trilha para estudar</h2>
+
+      ${TOPICS.map(
+        (t) => `
+        <button class="bento-cell topic-card" data-topic="${t.id}">
+          <div class="tc-icon">${t.icon}</div>
+          <div class="tc-label">${t.label}</div>
+          <div class="tc-count">${QUESTIONS[t.id].length} perguntas</div>
+        </button>`
+      ).join("")}
+
+    </div>
   `;
 
   app.querySelectorAll(".topic-card").forEach((card) => {
