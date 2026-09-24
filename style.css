@@ -39,7 +39,7 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  background: linear-gradient(135deg, var(--lilac), var(--blush), var(--lime-light));
+  background: linear-gradient(180deg, var(--lilac), var(--blush), var(--lime-light));
   background-attachment: fixed;
   color: var(--ink);
   font-family: 'Nunito', system-ui, sans-serif;
@@ -103,8 +103,9 @@ button { font: inherit; }
 .brand-accent { color: var(--rose); }
 
 .topic-nav {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-flow: column;
   align-items: center;
   gap: 8px;
   flex: 1 1 auto;
@@ -557,7 +558,7 @@ button { font: inherit; }
 
 .footer-tagline {
   margin: 4px 0 0;
-  font-size: 0.92rem;
+  font-size: 1.1rem;
   color: var(--lilac);
   opacity: 0.9;
 }
@@ -576,7 +577,7 @@ button { font: inherit; }
   font-family: 'Fredoka', sans-serif;
   font-weight: 600;
   font-size: 0.98rem;
-  color: var(--ink);
+  color: var(--ink-soft);
   background: var(--lime);
   border-radius: var(--radius-pill);
   padding: 12px 20px;
@@ -584,9 +585,9 @@ button { font: inherit; }
   transition: transform 0.1s ease, background 0.15s ease;
 }
 .footer-btn span { font-size: 1.1rem; }
-.footer-btn:hover { transform: translateY(-2px); background: var(--lime-dark); color: var(--white); }
-.footer-btn-accent { background: var(--lime-dark); color: var(--white); }
-.footer-btn-accent:hover { background: var(--lime); color: var(--ink); }
+.footer-btn:hover { transform: translateY(-2px); background: var(--lime-dark); }
+.footer-btn-accent { background: var(--lime); color: var(--ink-soft); }
+.footer-btn-accent:hover { background: var(--lime-dark); }
 
 @media (max-width: 640px) {
   .footer-inner { flex-direction: column; text-align: center; }
