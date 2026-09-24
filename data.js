@@ -2,15 +2,110 @@
 // Cada pergunta tem: question, options[4], correct (índice), curiosity (explicação)
 
 const TOPICS = [
-  { id: "mvc", label: "MVC", icon: "🗺️" },
-  { id: "frameworks", label: "Frameworks", icon: "🧰" },
-  { id: "migrations", label: "Migrations", icon: "🪵" },
-  { id: "models", label: "Models", icon: "🌾" },
-  { id: "eloquent", label: "ORM Eloquent", icon: "🐘" },
-  { id: "seeders", label: "Seeders & Factories", icon: "🌱" },
-  { id: "controllers", label: "Controllers", icon: "🎣" },
-  { id: "blade", label: "Views & Blade", icon: "🏡" },
+  { id: "mvc", label: "MVC", icon: "🗺️", video: "jyTNhT67ZyY" },
+  { id: "frameworks", label: "Frameworks", icon: "🧰", video: "2zqzzTnfa0E" },
+  { id: "migrations", label: "Migrations", icon: "🪵", video: "HRw1Dcxxu2k" },
+  { id: "models", label: "Models", icon: "🌾", video: "DzCCYdRdV30" },
+  { id: "eloquent", label: "ORM Eloquent", icon: "🐘", video: "snOXxJa31GI" },
+  { id: "seeders", label: "Seeders & Factories", icon: "🌱", video: "4oxjaQCJRaA" },
+  { id: "controllers", label: "Controllers", icon: "🎣", video: null },
+  { id: "blade", label: "Views & Blade", icon: "🏡", video: "HOv9CqqAZk0" },
 ];
+
+// Card explicativo mostrado antes do quiz de cada trilha: contexto rápido,
+// um exemplo prático e os principais benefícios do conceito.
+const GUIDES = {
+  mvc: {
+    intro:
+      "MVC (Model-View-Controller) organiza a aplicação em três partes com responsabilidades bem definidas: o Model cuida dos dados, a View cuida da interface e o Controller coordena as duas coisas.",
+    example:
+      "Fluxo de uma listagem de livros: o navegador pede a página → o Controller recebe a requisição → o Model busca os livros no banco → o Controller entrega esses dados pra View → a View monta o HTML e devolve ao navegador.",
+    benefits: [
+      "Cada camada evolui de forma independente, sem bagunçar as outras",
+      "Fica mais fácil de testar, corrigir e dar manutenção",
+      "Facilita o trabalho em equipe, já que cada parte pode ser desenvolvida em paralelo",
+    ],
+  },
+  frameworks: {
+    intro:
+      "Um framework é uma base de código pronta que evita reescrever, a cada projeto, soluções para problemas que todo sistema enfrenta — rotas, autenticação, acesso a banco de dados etc.",
+    example:
+      "Em vez de montar rotas, proteção contra ataques e conexão com o banco do zero, o Laravel já entrega essas peças prontas — você só encaixa a lógica do seu sistema em cima.",
+    benefits: [
+      "Desenvolvimento mais rápido, com menos código repetido",
+      "Estrutura padronizada, mais fácil de entender entre projetos diferentes",
+      "Segurança básica já embutida contra ataques comuns",
+      "Comunidade grande — fácil achar exemplos e tirar dúvidas",
+    ],
+  },
+  migrations: {
+    intro:
+      "Migrations são arquivos que registram, passo a passo, as mudanças na estrutura do banco de dados — funcionam como um histórico de versões, só que para tabelas e colunas em vez de código.",
+    example:
+      "php artisan make:migration cria o arquivo da migration; php artisan migrate aplica as mudanças no banco; e php artisan migrate:rollback desfaz a última leva de alterações.",
+    benefits: [
+      "Todo o time recria exatamente o mesmo banco em qualquer máquina",
+      "Dá pra desfazer alterações com segurança, usando o rollback",
+      "Banco de desenvolvimento e de produção ficam sempre sincronizados",
+    ],
+  },
+  models: {
+    intro:
+      "O Model é a camada do MVC responsável pelos dados: ele representa uma tabela do banco e concentra as regras de negócio daquela entidade, como validações e relacionamentos.",
+    example:
+      "Uma classe Produto que estende Model já sabe conversar com a tabela produtos — nela você define quais campos podem ser preenchidos (fillable) e como ela se relaciona com outras tabelas, como Categoria.",
+    benefits: [
+      "Centraliza as regras de negócio de cada entidade num só lugar",
+      "Se integra direto com o Eloquent, sem precisar escrever SQL manual",
+      "É reaproveitado em vários pontos do sistema: controllers, seeders, comandos",
+    ],
+  },
+  eloquent: {
+    intro:
+      "Eloquent é o ORM (Object-Relational Mapping) do Laravel: cada tabela do banco vira uma classe PHP (o Model) e cada linha vira um objeto, então dá pra manipular o banco sem escrever SQL na mão.",
+    example:
+      "Usuario::find(1) busca um registro pelo ID, Usuario::create(['nome' => 'Ana']) cria um novo, e relacionamentos como hasMany e belongsTo conectam tabelas automaticamente, sem precisar de JOIN manual.",
+    benefits: [
+      "Muito menos SQL repetitivo no código",
+      "Proteção automática contra SQL Injection",
+      "Código mais legível, próximo da linguagem natural",
+      "Trocar de banco de dados exige poucas mudanças no código",
+    ],
+  },
+  seeders: {
+    intro:
+      "Seeders e Factories populam o banco de dados com informações de teste, sem precisar cadastrar tudo manualmente pela interface a cada vez que o banco é recriado.",
+    example:
+      "Uma Factory gera dados fictícios automaticamente — Produto::factory()->count(20)->create() — e um Seeder chama essas factories pra popular o banco de uma vez com php artisan db:seed.",
+    benefits: [
+      "Ambiente de testes populado em segundos",
+      "Dados consistentes pra toda a equipe trabalhar em cima",
+      "Evita gambiarra de ficar cadastrando registro por registro durante o desenvolvimento",
+    ],
+  },
+  controllers: {
+    intro:
+      "O Controller é a camada do MVC que recebe a ação do usuário, decide o que fazer — normalmente conversando com o Model — e escolhe qual View devolver como resposta.",
+    example:
+      "Uma rota GET /produtos chama ProdutoController@index, que busca os produtos através do Model e devolve a View já com a lista pronta pra exibir.",
+    benefits: [
+      "Centraliza a lógica de cada funcionalidade num só lugar",
+      "Mantém a View livre de lógica de negócio",
+      "Facilita organizar rotas e permissões por ação",
+    ],
+  },
+  blade: {
+    intro:
+      "A View é a camada que o usuário enxerga, e o Blade é o motor de templates do Laravel: permite escrever HTML misturado com lógica de forma mais limpa do que PHP puro.",
+    example:
+      "Em vez de <?php foreach (...) { ?>, o Blade usa @foreach ... @endforeach, além de diretivas como @if e herança de layout com @extends e @yield, evitando repetir cabeçalho e rodapé em toda página.",
+    benefits: [
+      "Sintaxe mais limpa que misturar PHP puro dentro do HTML",
+      "Suporta herança de layout, sem repetir código em cada página",
+      "É compilado e cacheado automaticamente pelo Laravel, sem perder performance",
+    ],
+  },
+};
 
 const QUESTIONS = {
   mvc: [
