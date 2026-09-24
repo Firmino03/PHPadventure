@@ -12,12 +12,14 @@ const reactionText = document.getElementById("reactionText");
 const curiosityText = document.getElementById("curiosityText");
 
 let state = {
-  topicId: null,
-  order: [],       // shuffled question indices for the current topic
-  index: 0,         // position within order
-  selected: null,   // selected option index for current question
+  mode: null,        // "topic" | "mixed"
+  topicId: null,     // set in "topic" mode, used for nav highlight + result screen
+  queue: [],         // [{ topicId, qIndex }] — the questions for this run, in play order
+  index: 0,          // position within queue
+  selected: null,    // selected option index for current question
   answered: false,
   correctCount: 0,
+  topicStats: {},    // mixed mode only: topicId -> { correct, total }
 };
 
 // ---------- Navegação ----------
@@ -48,6 +50,10 @@ menuToggle.addEventListener("click", () => topicNav.classList.toggle("open"));
 
 // ---------- Home ----------
 
+function challengeSize() {
+  return TOPICS.reduce((sum, t) => sum + Math.max(1, Math.round(QUESTIONS[t.id].length / 4)), 0);
+}
+
 function renderHome() {
   setActiveNav(null);
   const totalQuestions = Object.values(QUESTIONS).reduce((sum, arr) => sum + arr.length, 0);
@@ -77,6 +83,19 @@ function renderHome() {
       <section class="bento-cell stat-cell stat-cell-accent">
         <span class="stat-number">${totalQuestions}</span>
         <span class="stat-label">perguntas no total</span>
+      </section>
+
+      <section class="bento-cell challenge-cell">
+        <div class="challenge-info">
+          <span class="challenge-eyebrow">⚡ Prática alternativa</span>
+          <h3>Desafio Relâmpago</h3>
+          <p>
+            Um mix de ${challengeSize()} perguntas puxando mais dos assuntos com maior peso —
+            ORM Eloquent, Views &amp; Blade, Models e Seeders &amp; Factories — fora da ordem
+            das trilhas, pra testar o que ficou de tudo.
+          </p>
+        </div>
+        <button class="btn btn-primary" id="startChallengeBtn">⚡ Começar desafio</button>
       </section>
 
       <h2 class="bento-section-title">Antes de plantar, vamos conhecer o terreno</h2>
@@ -123,6 +142,8 @@ function renderHome() {
   app.querySelectorAll(".topic-card").forEach((card) => {
     card.addEventListener("click", () => startQuiz(card.dataset.topic));
   });
+
+  document.getElementById("startChallengeBtn").addEventListener("click", startMixedChallenge);
 }
 
 // ---------- Quiz ----------
@@ -141,40 +162,74 @@ function startQuiz(topicId) {
   if (!questions) return renderHome();
 
   state = {
+    mode: "topic",
     topicId,
-    order: shuffle(questions.length),
+    queue: shuffle(questions.length).map((qi) => ({ topicId, qIndex: qi })),
     index: 0,
     selected: null,
     answered: false,
     correctCount: 0,
+    topicStats: {},
   };
   setActiveNav(topicId);
   renderQuestion();
 }
 
+// Monta uma fila misturando trilhas, puxando mais perguntas dos assuntos
+// com mais peso (mais perguntas cadastradas) e pelo menos 1 de cada trilha.
+function buildMixedQueue() {
+  const picks = TOPICS.flatMap((t) => {
+    const count = QUESTIONS[t.id].length;
+    const size = Math.max(1, Math.round(count / 4));
+    return shuffle(count)
+      .slice(0, size)
+      .map((qi) => ({ topicId: t.id, qIndex: qi }));
+  });
+  return shuffle(picks.length).map((i) => picks[i]);
+}
+
+function startMixedChallenge() {
+  state = {
+    mode: "mixed",
+    topicId: null,
+    queue: buildMixedQueue(),
+    index: 0,
+    selected: null,
+    answered: false,
+    correctCount: 0,
+    topicStats: {},
+  };
+  setActiveNav(null);
+  renderQuestion();
+}
+
 function currentTopic() {
-  return TOPICS.find((t) => t.id === state.topicId);
+  const entry = state.queue[state.index];
+  return TOPICS.find((t) => t.id === entry.topicId);
 }
 
 function currentQuestion() {
-  const qi = state.order[state.index];
-  return QUESTIONS[state.topicId][qi];
+  const entry = state.queue[state.index];
+  return QUESTIONS[entry.topicId][entry.qIndex];
 }
 
 function renderQuestion() {
   const topic = currentTopic();
   const q = currentQuestion();
-  const total = state.order.length;
+  const total = state.queue.length;
   const pct = Math.round((state.index / total) * 100);
   const letters = ["A", "B", "C", "D"];
+  const headTitle = state.mode === "mixed" ? "⚡ Desafio Relâmpago" : `${topic.icon} ${topic.label}`;
 
   app.innerHTML = `
     <section class="panel">
       <div class="quiz-head">
-        <h2>${topic.icon} ${topic.label}</h2>
+        <h2>${headTitle}</h2>
         <span class="quiz-progress">Pergunta ${state.index + 1} de ${total} · Acertos: ${state.correctCount}</span>
       </div>
       <div class="progress-bar"><div style="width:${pct}%"></div></div>
+
+      ${state.mode === "mixed" ? `<span class="mixed-topic-tag">${topic.icon} ${topic.label}</span>` : ""}
 
       <p class="question-text">${q.question}</p>
 
@@ -218,6 +273,15 @@ function submitAnswer() {
   const q = currentQuestion();
   const isCorrect = state.selected === q.correct;
   if (isCorrect) state.correctCount += 1;
+
+  if (state.mode === "mixed") {
+    const topic = currentTopic();
+    const stats = state.topicStats[topic.id] || { correct: 0, total: 0 };
+    stats.total += 1;
+    if (isCorrect) stats.correct += 1;
+    state.topicStats[topic.id] = stats;
+  }
+
   openResultModal(isCorrect, q);
 }
 
@@ -246,7 +310,7 @@ function closeModal() {
 function goToNext() {
   closeModal();
   state.index += 1;
-  if (state.index >= state.order.length) {
+  if (state.index >= state.queue.length) {
     renderResultScreen();
   } else {
     state.selected = null;
@@ -261,9 +325,49 @@ modal.addEventListener("click", (e) => {
 });
 
 function renderResultScreen() {
-  const topic = currentTopic();
-  const total = state.order.length;
+  const total = state.queue.length;
   const good = state.correctCount / total >= 0.7;
+
+  if (state.mode === "mixed") {
+    const weakTopics = Object.entries(state.topicStats)
+      .map(([id, s]) => ({ id, ...s, pct: s.correct / s.total }))
+      .filter((s) => s.pct < 0.7)
+      .sort((a, b) => a.pct - b.pct);
+
+    const weakListHtml = weakTopics
+      .map((s) => {
+        const t = TOPICS.find((tt) => tt.id === s.id);
+        return `<li>${t.icon} ${t.label} — ${s.correct}/${s.total}</li>`;
+      })
+      .join("");
+
+    app.innerHTML = `
+      <section class="panel result-screen">
+        <img src="assets/elephant-${good ? "happy" : "sad"}.png" alt="Elefante do PHP" />
+        <h2>Desafio Relâmpago concluído!</h2>
+        <p class="score-line">${state.correctCount} de ${total} certas</p>
+        <p>${good ? "Ótimo mix! Sua base nos principais assuntos está sólida." : "Deu pra ver onde apertar mais antes da prova."}</p>
+        ${
+          weakListHtml
+            ? `<div class="weak-topics">
+                <p class="weak-topics-label">Vale revisar:</p>
+                <ul>${weakListHtml}</ul>
+              </div>`
+            : ""
+        }
+        <div class="result-actions">
+          <button class="btn btn-primary" id="retryBtn">🔁 Refazer desafio</button>
+          <button class="btn btn-secondary" id="homeBtn">🏡 Ver todas as trilhas</button>
+        </div>
+      </section>
+    `;
+
+    document.getElementById("retryBtn").addEventListener("click", startMixedChallenge);
+    document.getElementById("homeBtn").addEventListener("click", renderHome);
+    return;
+  }
+
+  const topic = TOPICS.find((t) => t.id === state.topicId);
 
   app.innerHTML = `
     <section class="panel result-screen">
