@@ -50,7 +50,7 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 h1, h2, h3, .display-font {
   font-family: 'Fredoka', 'Nunito', sans-serif;
   font-weight: 600;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.5px;
 }
 
 button { font: inherit; }
@@ -121,7 +121,7 @@ button { font: inherit; }
 
 .topic-btn {
   font-family: 'Fredoka', sans-serif;
-  font-weight: 600;
+  font-weight: 800;
   font-size: 0.9rem;
   color: var(--ink);
   background: var(--lilac-soft);
