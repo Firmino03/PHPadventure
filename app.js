@@ -32,7 +32,7 @@ function buildNav() {
     btn.dataset.topic = t.id;
     btn.innerHTML = `<span class="btn-icon">${t.icon}</span><span>${t.label}</span>`;
     btn.addEventListener("click", () => {
-      startQuiz(t.id);
+      renderTopicGuide(t.id);
       topicNav.classList.remove("open");
     });
     topicNav.appendChild(btn);
@@ -136,11 +136,31 @@ function renderHome() {
         </button>`
       ).join("")}
 
+      <h2 class="bento-section-title">🎥 Vídeos por trilha</h2>
+
+      <section class="bento-cell video-carousel-cell">
+        <div class="video-carousel-track">
+          ${TOPICS.filter((t) => t.video)
+            .map(
+              (t) => `
+            <button class="video-card" data-topic="${t.id}">
+              <img src="https://img.youtube.com/vi/${t.video}/hqdefault.jpg" alt="Vídeo sobre ${t.label}" loading="lazy" />
+              <span class="video-card-label">${t.icon} ${t.label}</span>
+            </button>`
+            )
+            .join("")}
+        </div>
+      </section>
+
     </div>
   `;
 
   app.querySelectorAll(".topic-card").forEach((card) => {
-    card.addEventListener("click", () => startQuiz(card.dataset.topic));
+    card.addEventListener("click", () => renderTopicGuide(card.dataset.topic));
+  });
+
+  app.querySelectorAll(".video-card").forEach((card) => {
+    card.addEventListener("click", () => renderTopicGuide(card.dataset.topic));
   });
 
   document.getElementById("startChallengeBtn").addEventListener("click", startMixedChallenge);
@@ -155,6 +175,66 @@ function shuffle(n) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// ---------- Guia da trilha (card + vídeo, antes do quiz) ----------
+
+function renderTopicGuide(topicId) {
+  const topic = TOPICS.find((t) => t.id === topicId);
+  const guide = GUIDES[topicId];
+  if (!topic || !guide) return startQuiz(topicId);
+
+  setActiveNav(topicId);
+
+  const videoBlock = topic.video
+    ? `
+      <section class="panel guide-video-panel">
+        <h3 class="guide-video-title">🎥 Vídeoaula</h3>
+        <div class="video-embed">
+          <iframe
+            src="https://www.youtube.com/embed/${topic.video}"
+            title="Vídeo sobre ${topic.label}"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </section>`
+    : `
+      <section class="panel guide-video-panel guide-video-empty">
+        <h3 class="guide-video-title">🎥 Vídeoaula</h3>
+        <p>Ainda sem vídeo pra essa trilha — em breve!</p>
+      </section>`;
+
+  app.innerHTML = `
+    <section class="panel guide-card">
+      <div class="guide-head">
+        <span class="guide-icon">${topic.icon}</span>
+        <h2>${topic.label}</h2>
+      </div>
+      <p class="guide-intro">${guide.intro}</p>
+      <div class="guide-example">
+        <p class="guide-example-label">📌 Exemplo</p>
+        <p>${guide.example}</p>
+      </div>
+      <div class="guide-benefits">
+        <p class="guide-benefits-label">✅ Benefícios</p>
+        <ul>
+          ${guide.benefits.map((b) => `<li>${b}</li>`).join("")}
+        </ul>
+      </div>
+    </section>
+
+    ${videoBlock}
+
+    <div class="guide-actions">
+      <button class="btn btn-secondary" id="backHomeBtn">← Voltar ao início</button>
+      <button class="btn btn-primary" id="startQuizBtn">Ir pro quiz →</button>
+    </div>
+  `;
+
+  document.getElementById("backHomeBtn").addEventListener("click", renderHome);
+  document.getElementById("startQuizBtn").addEventListener("click", () => startQuiz(topicId));
 }
 
 function startQuiz(topicId) {
