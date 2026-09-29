@@ -228,6 +228,46 @@ function shuffle(n) {
   return arr;
 }
 
+// ---------- Bloco de código (com destaque simples de sintaxe) ----------
+
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+const CODE_TOKENS = new RegExp(
+  [
+    "(\\{\\{--[\\s\\S]*?--\\}\\})",                   // 1 comentário Blade
+    "(\\/\\/[^\\n]*|#[^\\n]*)",                        // 2 comentário // ou #
+    "('(?:[^'\\\\]|\\\\.)*')",                         // 3 string
+    "(\\$[A-Za-z_]\\w*)",                              // 4 variável PHP
+    "(@[A-Za-z]+)",                                    // 5 diretiva Blade
+    "\\b(public|function|return|class|extends|use|foreach|as|fn|new|static|null|true|false|php|artisan)\\b", // 6
+  ].join("|"),
+  "g"
+);
+
+function highlight(code) {
+  return escapeHtml(code).replace(CODE_TOKENS, (m, blade, comment, str, variable, directive, keyword) => {
+    if (blade || comment) return `<span class="comentario">${m}</span>`;
+    if (str) return `<span class="texto-string">${m}</span>`;
+    if (variable) return `<span class="tipo">${m}</span>`;
+    if (directive) return `<span class="funcao">${m}</span>`;
+    if (keyword) return `<span class="palavra-chave">${m}</span>`;
+    return m;
+  });
+}
+
+function codeBlock(file, code) {
+  return `
+    <div class="bloco-codigo">
+      <div class="bloco-codigo-cabecalho">
+        <div class="dots"><div class="dot dot-vermelho"></div><div class="dot dot-amarelo"></div><div class="dot dot-verde"></div></div>
+        <span class="bloco-codigo-titulo">${escapeHtml(file)}</span>
+      </div>
+      <pre>${highlight(code)}</pre>
+    </div>`;
+}
+
 // ---------- Guia da trilha (resumo + vídeo, antes do quiz) ----------
 
 function renderTopicGuide(topicId) {
@@ -265,14 +305,19 @@ function renderTopicGuide(topicId) {
       </div>`;
 
   show(`
-    <div class="secao-hero animar">
-      <div class="secao-breadcrumb">
-        <a id="crumbHome">Início</a>
-        <span>/</span>
-        <span>${topic.label}</span>
+    <div class="secao-hero secao-hero-guia animar">
+      <div class="secao-hero-texto">
+        <div class="secao-breadcrumb">
+          <a id="crumbHome">Início</a>
+          <span>/</span>
+          <span>${topic.label}</span>
+        </div>
+        <div class="secao-num">${num}</div>
+        <h1 class="secao-titulo"><span class="titulo-icone">${topic.icon}</span> ${topic.label}</h1>
       </div>
-      <div class="secao-num">${num}</div>
-      <h1 class="secao-titulo"><span class="titulo-icone">${topic.icon}</span> ${topic.label}</h1>
+      <div class="secao-hero-acao">
+        <button class="btn-primario btn-quiz" id="startQuizBtn">Ir pro quiz →</button>
+      </div>
     </div>
 
     <div class="secao-conteudo animar">
@@ -282,7 +327,19 @@ function renderTopicGuide(topicId) {
           <span class="nivel-titulo">O que é</span>
         </div>
         <p>${guide.intro}</p>
+        ${guide.analogy ? `<div class="caixa-info"><div class="icone">💡</div><p><strong>Pensando no dia a dia:</strong> ${guide.analogy}</p></div>` : ""}
       </div>
+
+      ${guide.concepts ? `
+      <div class="nivel-bloco">
+        <div class="nivel-cabecalho">
+          <span class="nivel-badge lilas">● Conceitos</span>
+          <span class="nivel-titulo">Termos-chave para a prova</span>
+        </div>
+        <div class="grade-cards">
+          ${guide.concepts.map((c) => `<div class="card"><h3>${c.t}</h3><p>${c.d}</p></div>`).join("")}
+        </div>
+      </div>` : ""}
 
       <div class="nivel-bloco">
         <div class="nivel-cabecalho">
@@ -290,7 +347,19 @@ function renderTopicGuide(topicId) {
           <span class="nivel-titulo">Na prática</span>
         </div>
         <div class="caixa-info"><div class="icone">📌</div><p>${guide.example}</p></div>
+        ${(guide.snippets || []).map((sn) => codeBlock(sn.file, sn.code)).join("")}
       </div>
+
+      ${guide.pitfalls ? `
+      <div class="nivel-bloco">
+        <div class="nivel-cabecalho">
+          <span class="nivel-badge alerta">● Atenção</span>
+          <span class="nivel-titulo">Pegadinhas comuns</span>
+        </div>
+        <ul class="lista-itens lista-aviso">
+          ${guide.pitfalls.map((p) => `<li>${p}</li>`).join("")}
+        </ul>
+      </div>` : ""}
 
       <div class="nivel-bloco">
         <div class="nivel-cabecalho">
@@ -315,7 +384,6 @@ function renderTopicGuide(topicId) {
       <span class="secao-footer-texto">// ${num} · ${topic.label}</span>
       <div class="secao-footer-acoes">
         <button class="btn-voltar" id="backHomeBtn">← Voltar ao início</button>
-        <button class="btn-primario" id="startQuizBtn">Ir pro quiz →</button>
       </div>
     </div>
   `);

@@ -1,12 +1,12 @@
 
 :root {
-  --cor-fundo:             #0a0a0f;
+  --cor-fundo:             #b794f6;
   --cor-superficie:        #111118;
   --cor-superficie-2:      #16161f;
   --cor-borda:             #1e1e2e;
-  --cor-borda-hover:       rgba(183,148,246,0.4);
+  --cor-borda-hover:       rgba(200, 109, 222, 0.495);
   --cor-acento:            #b794f6;   /* lilás (antes: azul #3b82f6) */
-  --cor-acento-texto:      #14101f;   /* texto sobre fundo lilás */
+  --cor-acento-texto:      #1c101f;   /* texto sobre fundo lilás */
   --cor-acento-verde:      #34d399;
   --cor-erro:              #f87171;
   --cor-texto:             #e2e8f0;
@@ -569,12 +569,12 @@ button { font: inherit; }
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 16px 20px;
   background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 19px;
+  line-height: 1.7;
   color: var(--cor-texto-suave);
   transition: border-color 0.15s;
 }
@@ -591,7 +591,9 @@ button { font: inherit; }
   border: 1px solid rgba(183,148,246,0.2);
 }
 .caixa-info .icone { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.secao-conteudo .caixa-info p, .caixa-info p { color: #d9c8fa; font-size: 15px; line-height: 1.65; margin: 0; }
+.caixa-info p { color: #d9c8fa; font-size: 16px; line-height: 1.65; margin: 0; }
+.secao-conteudo .caixa-info p { font-size: 19px; line-height: 1.75; margin: 0; }
+.secao-conteudo .caixa-info .icone { font-size: 24px; }
 .caixa-info p strong { color: #fff; }
 
 .bloco-codigo {
@@ -609,7 +611,7 @@ button { font: inherit; }
   background: rgba(255,255,255,0.02);
   border-bottom: 1px solid var(--cor-borda);
 }
-.bloco-codigo-titulo { font-family: var(--fonte-codigo); font-size: 11px; color: var(--cor-texto-mudo); letter-spacing: 1px; }
+.bloco-codigo-titulo { font-family: var(--fonte-codigo); font-size: 12px; color: var(--cor-texto-mudo); letter-spacing: 1px; }
 .dots { display: flex; gap: 6px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; }
 .dot-vermelho { background: #ff5f57; }
@@ -817,3 +819,75 @@ button { font: inherit; }
 }
 
 .caixa-info p.home-secao-label { font-size: 10px; margin-bottom: 6px; }
+
+
+/* ---------- Guia da trilha: cards de conceitos, código e avisos ---------- */
+
+.grade-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.card {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 20px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.card:hover { border-color: var(--cor-borda-hover); transform: translateY(-2px); }
+.card h3 { font-size: 19px; font-weight: 700; margin-bottom: 8px; color: var(--cor-acento); }
+.secao-conteudo .card p { font-size: 18px; color: var(--cor-texto-mudo); line-height: 1.65; margin: 0; }
+
+.nivel-badge.alerta { background: rgba(248,113,113,0.1); color: var(--cor-erro); border: 1px solid rgba(248,113,113,0.25); }
+
+.lista-aviso li { border-color: rgba(251,191,36,0.18); background: rgba(251,191,36,0.04); }
+.lista-aviso li:hover { border-color: rgba(251,191,36,0.4); }
+.lista-aviso li::before { content: '!'; color: #fbbf24; font-weight: 700; }
+
+pre {
+  padding: 20px;
+  overflow-x: auto;
+  font-family: var(--fonte-codigo);
+  font-size: 15px;
+  line-height: 1.85;
+  tab-size: 4;
+  color: var(--cor-texto);
+}
+pre::-webkit-scrollbar { height: 4px; }
+pre::-webkit-scrollbar-thumb { background: var(--cor-texto-mudo); border-radius: 2px; }
+
+.palavra-chave { color: #ff79c6; }
+.tipo          { color: #8be9fd; }
+.texto-string  { color: #f1fa8c; }
+.comentario    { color: #6272a4; font-style: italic; }
+.funcao        { color: #50fa7b; }
+
+
+/* ---------- Botão do quiz no topo da trilha ---------- */
+
+.secao-hero-guia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.secao-hero-texto { min-width: 0; position: relative; z-index: 1; }
+.secao-hero-acao { position: relative; z-index: 1; flex-shrink: 0; }
+.btn-quiz { font-size: 14px; padding: 16px 32px; }
+
+/* ---------- Rodapé do site centralizado ---------- */
+
+.footer-inner {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+.footer-brand { text-align: center; }
+.footer-actions { justify-content: center; }
+
+@media (max-width: 600px) {
+  .secao-hero-acao, .btn-quiz { width: 100%; justify-content: center; }
+}
