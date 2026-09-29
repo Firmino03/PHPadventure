@@ -2,7 +2,6 @@
 
 const app = document.getElementById("app");
 const topicNav = document.getElementById("topicNav");
-const menuToggle = document.getElementById("menuToggle");
 const modal = document.getElementById("resultModal");
 const closeModalBtn = document.getElementById("closeModal");
 const nextBtn = document.getElementById("nextBtn");
@@ -22,31 +21,61 @@ let state = {
   topicStats: {},    // mixed mode only: topicId -> { correct, total }
 };
 
+const pad = (n) => String(n).padStart(2, "0");
+
+function show(html) {
+  app.innerHTML = html;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 // ---------- Navegação ----------
 
 function buildNav() {
   topicNav.innerHTML = "";
   TOPICS.forEach((t) => {
     const btn = document.createElement("button");
-    btn.className = "topic-btn";
+    btn.className = "nav-link";
     btn.dataset.topic = t.id;
-    btn.innerHTML = `<span class="btn-icon">${t.icon}</span><span>${t.label}</span>`;
-    btn.addEventListener("click", () => {
-      renderTopicGuide(t.id);
-      topicNav.classList.remove("open");
-    });
+    btn.textContent = t.label;
+    btn.addEventListener("click", () => renderTopicGuide(t.id));
     topicNav.appendChild(btn);
   });
 }
 
 function setActiveNav(topicId) {
-  document.querySelectorAll(".topic-btn").forEach((b) => {
-    b.classList.toggle("active", b.dataset.topic === topicId);
+  document.querySelectorAll(".nav-link").forEach((b) => {
+    b.classList.toggle("ativo", b.dataset.topic === topicId);
   });
 }
 
 document.querySelector('[data-nav="home"]').addEventListener("click", renderHome);
-menuToggle.addEventListener("click", () => topicNav.classList.toggle("open"));
+
+// ---------- Modal de vídeo ----------
+
+const videoModal = document.getElementById("modal-video");
+const videoIframe = document.getElementById("modal-iframe");
+const videoTitle = document.getElementById("modal-titulo-texto");
+
+function openVideo(id, title) {
+  videoIframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+  videoTitle.textContent = title;
+  videoModal.classList.add("aberto");
+  document.body.style.overflow = "hidden";
+}
+
+function closeVideo() {
+  videoIframe.src = "";
+  videoModal.classList.remove("aberto");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("modal-fechar").addEventListener("click", closeVideo);
+videoModal.addEventListener("click", (e) => { if (e.target === videoModal) closeVideo(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  closeVideo();
+  closeModal();
+});
 
 // ---------- Home ----------
 
@@ -57,112 +86,134 @@ function challengeSize() {
 function renderHome() {
   setActiveNav(null);
   const totalQuestions = Object.values(QUESTIONS).reduce((sum, arr) => sum + arr.length, 0);
+  const videoTopics = TOPICS.filter((t) => t.video);
 
-  app.innerHTML = `
-    <div class="bento-grid">
+  show(`
+    <section class="home-hero animar">
+      <img class="hero-mascote" src="assets/elephant-happy.png" alt="Elefante do PHP feliz, mascote do site" />
+      <div class="hero-badge">// Guia de estudos interativo</div>
+      <h1 class="hero-titulo">PHPadventure</h1>
+      <p class="hero-descricao">
+        Um jeito de revisar <strong>Laravel, PHP e MySQL</strong> antes da prova, respondendo às
+        perguntas que o professor passou — trilha por trilha, no seu ritmo.
+      </p>
+      <p class="hero-sub">${TOPICS.length} trilhas · ${totalQuestions} perguntas</p>
+      <div class="hero-cta-grid">
+        <button class="btn-primario" id="startBtn">▶ Começar agora</button>
+        <button class="btn-secundario" id="videosBtn">🎬 Ver videoaulas</button>
+      </div>
+    </section>
 
-      <section class="bento-cell hero-cell">
-        <span class="eyebrow">Guia de estudos interativo</span>
-        <h1>Bem-vindo ao PHPadventure</h1>
-        <p>
-          Um jeito de revisar Laravel, PHP e MySQL antes da prova, respondendo às perguntas
-          que o professor passou — trilha por trilha, no seu ritmo. Escolha um assunto abaixo
-          e comece a estudar.
-        </p>
-      </section>
-
-      <section class="bento-cell hero-image-cell">
-        <img src="assets/elephant-happy.png" alt="Elefante do PHP feliz, mascote do site" />
-      </section>
-
-      <section class="bento-cell stat-cell">
-        <span class="stat-number">${TOPICS.length}</span>
-        <span class="stat-label">trilhas de estudo</span>
-      </section>
-
-      <section class="bento-cell stat-cell stat-cell-accent">
-        <span class="stat-number">${totalQuestions}</span>
-        <span class="stat-label">perguntas no total</span>
-      </section>
-
-      <section class="bento-cell challenge-cell">
-        <div class="challenge-info">
-          <span class="challenge-eyebrow">⚡ Prática alternativa</span>
-          <h3>Desafio Relâmpago</h3>
-          <p>
-            Um mix de ${challengeSize()} perguntas puxando mais dos assuntos com maior peso —
-            ORM Eloquent, Views &amp; Blade, Models e Seeders &amp; Factories — fora da ordem
-            das trilhas, pra testar o que ficou de tudo.
+    <section class="home-beneficios">
+      <div class="home-secao-label">// Antes de plantar</div>
+      <h2 class="home-secao-titulo">Vamos conhecer o terreno</h2>
+      <p class="home-secao-sub">Três peças que aparecem em todas as trilhas. Entender o papel de cada uma já facilita o resto do estudo.</p>
+      <div class="beneficios-grid">
+        <div class="beneficio-card">
+          <div class="beneficio-icone">🐘</div>
+          <div class="beneficio-titulo">Você sabe o que é PHP?</div>
+          <p class="beneficio-texto">
+            PHP é a linguagem que roda por trás da página: é ela quem lê o pedido do navegador,
+            conversa com o banco de dados e decide o que vai aparecer na tela.
           </p>
         </div>
-        <button class="btn btn-primary" id="startChallengeBtn">⚡ Começar desafio</button>
-      </section>
+        <div class="beneficio-card">
+          <div class="beneficio-icone">🧰</div>
+          <div class="beneficio-titulo">E o Laravel?</div>
+          <p class="beneficio-texto">
+            Laravel é um <em>framework</em> feito em PHP: convenções e ferramentas prontas
+            (rotas, Models, Migrations, Blade...) para organizar o código em vez de espalhar
+            tudo pelo projeto.
+          </p>
+        </div>
+        <div class="beneficio-card">
+          <div class="beneficio-icone">🪣</div>
+          <div class="beneficio-titulo">E o MySQL?</div>
+          <p class="beneficio-texto">
+            MySQL é o banco de dados onde tudo fica guardado. O Laravel, através do Eloquent,
+            busca e organiza o que for preciso sem você escrever SQL na mão o tempo todo.
+          </p>
+        </div>
+      </div>
+    </section>
 
-      <h2 class="bento-section-title">Antes de plantar, vamos conhecer o terreno</h2>
+    <section class="home-topicos">
+      <div class="home-secao-label">// Conteúdo do guia</div>
+      <h2 class="home-secao-titulo">Escolha uma trilha</h2>
+      <p class="home-secao-sub">Clique em qualquer trilha para ver o resumo, a videoaula e as perguntas.</p>
+      <div class="topicos-grid">
+        ${TOPICS.map(
+          (t, i) => `
+          <button class="topico-card" data-topic="${t.id}">
+            <span class="topico-num">${pad(i + 1)}</span>
+            <div>
+              <div class="topico-nome">${t.label}</div>
+              <div class="topico-desc">${QUESTIONS[t.id].length} perguntas</div>
+            </div>
+          </button>`
+        ).join("")}
+      </div>
+    </section>
 
-      <section class="bento-cell story-cell">
-        <h3>🐘 Você sabe o que é PHP?</h3>
-        <p>
-          PHP é a linguagem que roda por trás da página: é ela quem lê o pedido do navegador,
-          conversa com o banco de dados e decide o que vai aparecer na tela.
-        </p>
-      </section>
+    <section class="home-desafio">
+      <div class="home-secao-label">// Prática alternativa</div>
+      <h2 class="home-secao-titulo">Desafio Relâmpago</h2>
+      <div class="desafio-card">
+        <div class="desafio-info">
+          <h3>⚡ ${challengeSize()} perguntas misturadas</h3>
+          <p>
+            Puxa mais dos assuntos com maior peso — ORM Eloquent, Views &amp; Blade, Models e
+            Seeders &amp; Factories — fora da ordem das trilhas, pra testar o que ficou de tudo.
+          </p>
+        </div>
+        <button class="btn-primario" id="startChallengeBtn">⚡ Começar desafio</button>
+      </div>
+    </section>
 
-      <section class="bento-cell story-cell">
-        <h3>🧰 E o Laravel?</h3>
-        <p>
-          Laravel é um <em>framework</em> feito em PHP: convenções e ferramentas prontas
-          (rotas, Models, Migrations, Blade...) para organizar o código em vez de espalhar
-          tudo pelo projeto.
-        </p>
-      </section>
-
-      <section class="bento-cell story-cell">
-        <h3>🪣 E o MySQL?</h3>
-        <p>
-          MySQL é o banco de dados onde tudo fica guardado. O Laravel, através do Eloquent,
-          busca e organiza o que for preciso sem você escrever SQL na mão o tempo todo.
-        </p>
-      </section>
-
-      <h2 class="bento-section-title">Escolha uma trilha para estudar</h2>
-
-      ${TOPICS.map(
-        (t) => `
-        <button class="bento-cell topic-card" data-topic="${t.id}">
-          <div class="tc-icon">${t.icon}</div>
-          <div class="tc-label">${t.label}</div>
-          <div class="tc-count">${QUESTIONS[t.id].length} perguntas</div>
-        </button>`
-      ).join("")}
-
-      <h2 class="bento-section-title">🎥 Vídeos por trilha</h2>
-
-      <section class="bento-cell video-carousel-cell">
-        <div class="video-carousel-track">
-          ${TOPICS.filter((t) => t.video)
+    <section class="home-videos" id="videos-section">
+      <div class="home-secao-label">// Videoaulas</div>
+      <h2 class="home-secao-titulo">Vídeos por trilha</h2>
+      <p class="home-secao-sub">Clique para assistir sem sair da página.</p>
+      <div class="carousel-wrapper">
+        <button class="carousel-btn carousel-btn-prev" id="carousel-prev" aria-label="Anterior">‹</button>
+        <div class="carousel-trilho" id="carousel-trilho">
+          ${videoTopics
             .map(
-              (t) => `
-            <button class="video-card" data-topic="${t.id}">
-              <img src="https://img.youtube.com/vi/${t.video}/hqdefault.jpg" alt="Vídeo sobre ${t.label}" loading="lazy" />
-              <span class="video-card-label">${t.icon} ${t.label}</span>
+              (t, i) => `
+            <button class="video-card" data-video-id="${t.video}" data-video-titulo="${t.label}">
+              <div class="video-thumb">
+                <img src="https://img.youtube.com/vi/${t.video}/mqdefault.jpg" alt="Vídeo sobre ${t.label}" loading="lazy" />
+                <div class="video-thumb-overlay"><div class="play-icon">▶</div></div>
+              </div>
+              <div class="video-info">
+                <div class="video-numero">Aula ${pad(i + 1)}</div>
+                <div class="video-titulo">${t.label}</div>
+              </div>
             </button>`
             )
             .join("")}
         </div>
-      </section>
+        <button class="carousel-btn carousel-btn-next" id="carousel-next" aria-label="Próximo">›</button>
+      </div>
+    </section>
+  `);
 
-    </div>
-  `;
-
-  app.querySelectorAll(".topic-card").forEach((card) => {
+  app.querySelectorAll(".topico-card").forEach((card) => {
     card.addEventListener("click", () => renderTopicGuide(card.dataset.topic));
   });
 
   app.querySelectorAll(".video-card").forEach((card) => {
-    card.addEventListener("click", () => renderTopicGuide(card.dataset.topic));
+    card.addEventListener("click", () => openVideo(card.dataset.videoId, card.dataset.videoTitulo));
   });
 
+  const trilho = document.getElementById("carousel-trilho");
+  document.getElementById("carousel-prev").addEventListener("click", () => trilho.scrollBy({ left: -320, behavior: "smooth" }));
+  document.getElementById("carousel-next").addEventListener("click", () => trilho.scrollBy({ left: 320, behavior: "smooth" }));
+
+  document.getElementById("startBtn").addEventListener("click", () => renderTopicGuide(TOPICS[0].id));
+  document.getElementById("videosBtn").addEventListener("click", () => {
+    document.getElementById("videos-section").scrollIntoView({ behavior: "smooth" });
+  });
   document.getElementById("startChallengeBtn").addEventListener("click", startMixedChallenge);
 }
 
@@ -177,7 +228,7 @@ function shuffle(n) {
   return arr;
 }
 
-// ---------- Guia da trilha (card + vídeo, antes do quiz) ----------
+// ---------- Guia da trilha (resumo + vídeo, antes do quiz) ----------
 
 function renderTopicGuide(topicId) {
   const topic = TOPICS.find((t) => t.id === topicId);
@@ -185,11 +236,15 @@ function renderTopicGuide(topicId) {
   if (!topic || !guide) return startQuiz(topicId);
 
   setActiveNav(topicId);
+  const num = pad(TOPICS.indexOf(topic) + 1);
 
   const videoBlock = topic.video
     ? `
-      <section class="panel guide-video-panel">
-        <h3 class="guide-video-title">🎥 Vídeoaula</h3>
+      <div class="bloco-codigo">
+        <div class="bloco-codigo-cabecalho">
+          <div class="dots"><div class="dot dot-vermelho"></div><div class="dot dot-amarelo"></div><div class="dot dot-verde"></div></div>
+          <span class="bloco-codigo-titulo">videoaula-${topic.id}</span>
+        </div>
         <div class="video-embed">
           <iframe
             src="https://www.youtube.com/embed/${topic.video}"
@@ -199,40 +254,73 @@ function renderTopicGuide(topicId) {
             allowfullscreen
           ></iframe>
         </div>
-      </section>`
+      </div>`
     : `
-      <section class="panel guide-video-panel guide-video-empty">
-        <h3 class="guide-video-title">🎥 Vídeoaula</h3>
-        <p>Ainda sem vídeo pra essa trilha — em breve!</p>
-      </section>`;
+      <div class="bloco-codigo">
+        <div class="bloco-codigo-cabecalho">
+          <div class="dots"><div class="dot dot-vermelho"></div><div class="dot dot-amarelo"></div><div class="dot dot-verde"></div></div>
+          <span class="bloco-codigo-titulo">videoaula-${topic.id}</span>
+        </div>
+        <p class="video-vazio">// Ainda sem vídeo pra essa trilha — em breve!</p>
+      </div>`;
 
-  app.innerHTML = `
-    <section class="panel guide-card">
-      <div class="guide-head">
-        <span class="guide-icon">${topic.icon}</span>
-        <h2>${topic.label}</h2>
+  show(`
+    <div class="secao-hero animar">
+      <div class="secao-breadcrumb">
+        <a id="crumbHome">Início</a>
+        <span>/</span>
+        <span>${topic.label}</span>
       </div>
-      <p class="guide-intro">${guide.intro}</p>
-      <div class="guide-example">
-        <p class="guide-example-label">📌 Exemplo</p>
-        <p>${guide.example}</p>
+      <div class="secao-num">${num}</div>
+      <h1 class="secao-titulo"><span class="titulo-icone">${topic.icon}</span> ${topic.label}</h1>
+    </div>
+
+    <div class="secao-conteudo animar">
+      <div class="nivel-bloco">
+        <div class="nivel-cabecalho">
+          <span class="nivel-badge simples">● Resumo</span>
+          <span class="nivel-titulo">O que é</span>
+        </div>
+        <p>${guide.intro}</p>
       </div>
-      <div class="guide-benefits">
-        <p class="guide-benefits-label">✅ Benefícios</p>
-        <ul>
+
+      <div class="nivel-bloco">
+        <div class="nivel-cabecalho">
+          <span class="nivel-badge medio">● Exemplo</span>
+          <span class="nivel-titulo">Na prática</span>
+        </div>
+        <div class="caixa-info"><div class="icone">📌</div><p>${guide.example}</p></div>
+      </div>
+
+      <div class="nivel-bloco">
+        <div class="nivel-cabecalho">
+          <span class="nivel-badge lilas">● Benefícios</span>
+          <span class="nivel-titulo">Por que isso importa</span>
+        </div>
+        <ul class="lista-itens">
           ${guide.benefits.map((b) => `<li>${b}</li>`).join("")}
         </ul>
       </div>
-    </section>
 
-    ${videoBlock}
-
-    <div class="guide-actions">
-      <button class="btn btn-secondary" id="backHomeBtn">← Voltar ao início</button>
-      <button class="btn btn-primary" id="startQuizBtn">Ir pro quiz →</button>
+      <div class="nivel-bloco">
+        <div class="nivel-cabecalho">
+          <span class="nivel-badge lilas">● Videoaula</span>
+          <span class="nivel-titulo">Assista antes do quiz</span>
+        </div>
+        ${videoBlock}
+      </div>
     </div>
-  `;
 
+    <div class="secao-footer">
+      <span class="secao-footer-texto">// ${num} · ${topic.label}</span>
+      <div class="secao-footer-acoes">
+        <button class="btn-voltar" id="backHomeBtn">← Voltar ao início</button>
+        <button class="btn-primario" id="startQuizBtn">Ir pro quiz →</button>
+      </div>
+    </div>
+  `);
+
+  document.getElementById("crumbHome").addEventListener("click", renderHome);
   document.getElementById("backHomeBtn").addEventListener("click", renderHome);
   document.getElementById("startQuizBtn").addEventListener("click", () => startQuiz(topicId));
 }
@@ -299,17 +387,28 @@ function renderQuestion() {
   const total = state.queue.length;
   const pct = Math.round((state.index / total) * 100);
   const letters = ["A", "B", "C", "D"];
-  const headTitle = state.mode === "mixed" ? "⚡ Desafio Relâmpago" : `${topic.icon} ${topic.label}`;
+  const isMixed = state.mode === "mixed";
+  const headTitle = isMixed ? `<span class="titulo-icone">⚡</span> Desafio Relâmpago` : `<span class="titulo-icone">${topic.icon}</span> ${topic.label}`;
 
-  app.innerHTML = `
-    <section class="panel">
-      <div class="quiz-head">
-        <h2>${headTitle}</h2>
-        <span class="quiz-progress">Pergunta ${state.index + 1} de ${total} · Acertos: ${state.correctCount}</span>
+  show(`
+    <div class="secao-hero animar">
+      <div class="secao-breadcrumb">
+        <a id="crumbHome">Início</a>
+        <span>/</span>
+        <span>${isMixed ? "Desafio Relâmpago" : topic.label}</span>
+      </div>
+      <div class="secao-num">Pergunta ${pad(state.index + 1)} de ${pad(total)}</div>
+      <h1 class="secao-titulo">${headTitle}</h1>
+    </div>
+
+    <div class="secao-conteudo animar">
+      <div class="nivel-cabecalho">
+        <span class="nivel-badge simples">● Acertos: ${state.correctCount}</span>
+        <span class="quiz-progresso">${pct}% concluído</span>
       </div>
       <div class="progress-bar"><div style="width:${pct}%"></div></div>
 
-      ${state.mode === "mixed" ? `<span class="mixed-topic-tag">${topic.icon} ${topic.label}</span>` : ""}
+      ${isMixed ? `<span class="mixed-topic-tag">${topic.icon} ${topic.label}</span>` : ""}
 
       <p class="question-text">${q.question}</p>
 
@@ -326,12 +425,13 @@ function renderQuestion() {
       </div>
 
       <div class="quiz-actions">
-        <button class="btn btn-secondary" id="backHomeBtn">← Voltar ao início</button>
-        <button class="btn btn-primary" id="submitBtn" disabled>Enviar resposta</button>
+        <button class="btn-voltar" id="backHomeBtn">← Voltar ao início</button>
+        <button class="btn-primario" id="submitBtn" disabled>Enviar resposta</button>
       </div>
-    </section>
-  `;
+    </div>
+  `);
 
+  document.getElementById("crumbHome").addEventListener("click", renderHome);
   document.getElementById("backHomeBtn").addEventListener("click", renderHome);
 
   const optionButtons = app.querySelectorAll(".option-btn");
@@ -370,21 +470,21 @@ function openResultModal(isCorrect, q) {
     reactionImg.src = "assets/elephant-happy.png";
     reactionImg.alt = "Elefante do PHP feliz, comemorando a resposta certa";
     reactionTitle.textContent = "Certinho! 🎉";
-    reactionTitle.className = "reaction-title correct";
+    reactionTitle.className = "reacao-titulo correct";
     reactionText.textContent = "Você acertou essa. Segue a curiosidade da questão:";
   } else {
     reactionImg.src = "assets/elephant-sad.png";
     reactionImg.alt = "Elefante do PHP triste, pois a resposta estava errada";
     reactionTitle.textContent = "Quase lá...";
-    reactionTitle.className = "reaction-title wrong";
+    reactionTitle.className = "reacao-titulo wrong";
     reactionText.textContent = `Essa não foi. A resposta certa era: "${q.options[q.correct]}"`;
   }
   curiosityText.textContent = q.curiosity;
-  modal.classList.remove("hidden");
+  modal.classList.add("aberto");
 }
 
 function closeModal() {
-  modal.classList.add("hidden");
+  modal.classList.remove("aberto");
 }
 
 function goToNext() {
@@ -407,62 +507,47 @@ modal.addEventListener("click", (e) => {
 function renderResultScreen() {
   const total = state.queue.length;
   const good = state.correctCount / total >= 0.7;
+  const mixed = state.mode === "mixed";
+  const topic = mixed ? null : TOPICS.find((t) => t.id === state.topicId);
 
-  if (state.mode === "mixed") {
+  let weakHtml = "";
+  if (mixed) {
     const weakTopics = Object.entries(state.topicStats)
       .map(([id, s]) => ({ id, ...s, pct: s.correct / s.total }))
       .filter((s) => s.pct < 0.7)
       .sort((a, b) => a.pct - b.pct);
 
-    const weakListHtml = weakTopics
-      .map((s) => {
-        const t = TOPICS.find((tt) => tt.id === s.id);
-        return `<li>${t.icon} ${t.label} — ${s.correct}/${s.total}</li>`;
-      })
-      .join("");
-
-    app.innerHTML = `
-      <section class="panel result-screen">
-        <img src="assets/elephant-${good ? "happy" : "sad"}.png" alt="Elefante do PHP" />
-        <h2>Desafio Relâmpago concluído!</h2>
-        <p class="score-line">${state.correctCount} de ${total} certas</p>
-        <p>${good ? "Ótimo mix! Sua base nos principais assuntos está sólida." : "Deu pra ver onde apertar mais antes da prova."}</p>
-        ${
-          weakListHtml
-            ? `<div class="weak-topics">
-                <p class="weak-topics-label">Vale revisar:</p>
-                <ul>${weakListHtml}</ul>
-              </div>`
-            : ""
-        }
-        <div class="result-actions">
-          <button class="btn btn-primary" id="retryBtn">🔁 Refazer desafio</button>
-          <button class="btn btn-secondary" id="homeBtn">🏡 Ver todas as trilhas</button>
-        </div>
-      </section>
-    `;
-
-    document.getElementById("retryBtn").addEventListener("click", startMixedChallenge);
-    document.getElementById("homeBtn").addEventListener("click", renderHome);
-    return;
+    if (weakTopics.length) {
+      const items = weakTopics
+        .map((s) => {
+          const t = TOPICS.find((tt) => tt.id === s.id);
+          return `<li>${t.icon} ${t.label} — ${s.correct}/${s.total}</li>`;
+        })
+        .join("");
+      weakHtml = `<div class="weak-topics"><p class="weak-topics-label">// Vale revisar</p><ul>${items}</ul></div>`;
+    }
   }
 
-  const topic = TOPICS.find((t) => t.id === state.topicId);
+  const title = mixed ? "Desafio Relâmpago concluído!" : `Trilha de ${topic.label} concluída!`;
+  const message = mixed
+    ? good ? "Ótimo mix! Sua base nos principais assuntos está sólida." : "Deu pra ver onde apertar mais antes da prova."
+    : good ? "Colheita boa! Você mandou bem nessa trilha." : "Vale a pena revisar esse assunto de novo antes da prova.";
 
-  app.innerHTML = `
-    <section class="panel result-screen">
+  show(`
+    <div class="secao-conteudo result-screen animar">
       <img src="assets/elephant-${good ? "happy" : "sad"}.png" alt="Elefante do PHP" />
-      <h2>Trilha de ${topic.label} concluída!</h2>
+      <h2>${title}</h2>
       <p class="score-line">${state.correctCount} de ${total} certas</p>
-      <p>${good ? "Colheita boa! Você mandou bem nessa trilha." : "Vale a pena revisar esse assunto de novo antes da prova."}</p>
+      <p>${message}</p>
+      ${weakHtml}
       <div class="result-actions">
-        <button class="btn btn-primary" id="retryBtn">🔁 Refazer trilha</button>
-        <button class="btn btn-secondary" id="homeBtn">🏡 Ver todas as trilhas</button>
+        <button class="btn-primario" id="retryBtn">🔁 ${mixed ? "Refazer desafio" : "Refazer trilha"}</button>
+        <button class="btn-secundario" id="homeBtn">🏡 Ver todas as trilhas</button>
       </div>
-    </section>
-  `;
+    </div>
+  `);
 
-  document.getElementById("retryBtn").addEventListener("click", () => startQuiz(state.topicId));
+  document.getElementById("retryBtn").addEventListener("click", () => (mixed ? startMixedChallenge() : startQuiz(state.topicId)));
   document.getElementById("homeBtn").addEventListener("click", renderHome);
 }
 

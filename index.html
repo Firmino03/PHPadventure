@@ -8,22 +8,20 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐘</text></svg>" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,800;1,600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand" data-nav="home">
-        <span class="brand-text">PHP<span class="brand-accent">adventure</span></span>
-      </div>
-      <nav id="topicNav" class="topic-nav" aria-label="Trilhas de estudo"></nav>
-      <button id="menuToggle" class="menu-toggle" aria-label="Abrir menu de trilhas">☰</button>
+  <nav id="nav-principal" aria-label="Trilhas de estudo">
+    <div class="nav-logo" data-nav="home">
+      <span class="nav-logo-badge">PHP</span>
+      <span class="nav-logo-texto">adventure</span>
     </div>
-  </header>
+    <div class="nav-links" id="topicNav"></div>
+  </nav>
 
-  <main id="app"></main>
+  <div id="app"></div>
 
   <footer class="site-footer">
     <div class="footer-inner">
@@ -49,25 +47,42 @@
   </footer>
 
   <!-- Modal de resultado da resposta -->
-  <div id="resultModal" class="modal-overlay hidden">
-    <div class="modal-card">
-      <button id="closeModal" class="modal-close" aria-label="Fechar">✕</button>
-
-      <div class="modal-reaction">
-        <img id="reactionImg" src="" alt="" />
-        <p id="reactionTitle" class="reaction-title"></p>
-        <p id="reactionText" class="reaction-text"></p>
+  <div id="resultModal" class="modal-video">
+    <div class="modal-inner modal-resultado">
+      <div class="modal-cabecalho">
+        <span class="modal-titulo">// resultado</span>
+        <button id="closeModal" class="modal-fechar" aria-label="Fechar">✕</button>
       </div>
-
-      <div class="modal-curiosity">
-        <img src="assets/elephant-curious.png" alt="Elefante curioso" class="curious-img" />
-        <div>
-          <p class="curiosity-label">Curiosidade da questão</p>
-          <p id="curiosityText" class="curiosity-text"></p>
+      <div class="modal-corpo">
+        <div class="modal-reacao">
+          <img id="reactionImg" src="" alt="" />
+          <p id="reactionTitle" class="reacao-titulo"></p>
+          <p id="reactionText" class="reacao-texto"></p>
         </div>
-      </div>
 
-      <button id="nextBtn" class="btn btn-primary btn-block">Continuar a jornada →</button>
+        <div class="caixa-info">
+          <img src="assets/elephant-curious.png" alt="Elefante curioso" width="56" height="56" style="flex-shrink:0;width:56px;height:auto;align-self:flex-start" />
+          <div>
+            <p class="home-secao-label" style="margin-bottom:6px">// Curiosidade da questão</p>
+            <p id="curiosityText"></p>
+          </div>
+        </div>
+
+        <button id="nextBtn" class="btn-primario">Continuar a jornada →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de vídeo -->
+  <div class="modal-video" id="modal-video">
+    <div class="modal-inner">
+      <div class="modal-cabecalho">
+        <span class="modal-titulo" id="modal-titulo-texto"></span>
+        <button class="modal-fechar" id="modal-fechar" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-iframe-wrap">
+        <iframe id="modal-iframe" src="" title="Videoaula" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
     </div>
   </div>
 
