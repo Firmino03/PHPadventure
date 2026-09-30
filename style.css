@@ -1,18 +1,22 @@
+/* ===========================================================
+   PHPadventure — visual baseado no CodeLogic (tema escuro),
+   com acento lilás no lugar do azul.
+=========================================================== */
 
 :root {
-  --cor-fundo:             #b794f6;
-  --cor-superficie:        #111118;
-  --cor-superficie-2:      #16161f;
-  --cor-borda:             #1e1e2e;
-  --cor-borda-hover:       rgba(200, 109, 222, 0.495);
+  --cor-fundo:             #1c1633;
+  --cor-superficie:        #261e45;
+  --cor-superficie-2:      #2e2552;
+  --cor-borda:             #40356a;
+  --cor-borda-hover:       rgba(183,148,246,0.6);
   --cor-acento:            #b794f6;   /* lilás (antes: azul #3b82f6) */
-  --cor-acento-texto:      #1c101f;   /* texto sobre fundo lilás */
+  --cor-acento-texto:      #14101f;   /* texto sobre fundo lilás */
   --cor-acento-verde:      #34d399;
   --cor-erro:              #f87171;
-  --cor-texto:             #e2e8f0;
-  --cor-texto-suave:       #94a3b8;
-  --cor-texto-mudo:        #64748b;
-  --codigo-fundo:          #0d1117;
+  --cor-texto:             #f1ecff;
+  --cor-texto-suave:       #c3badf;
+  --cor-texto-mudo:        #9a90c0;
+  --codigo-fundo:          #181229;
   --fonte-titulo:          'Syne', sans-serif;
   --fonte-codigo:          'Space Mono', monospace;
   --fonte-tamanho-base:    17px;
@@ -48,7 +52,7 @@ button { font: inherit; }
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10,10,15,0.92);
+  background: rgba(28,22,51,0.92);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--cor-borda);
   padding: 0 40px;
@@ -176,7 +180,7 @@ button { font: inherit; }
   position: absolute;
   top: -200px; left: 50%; transform: translateX(-50%);
   width: 900px; height: 500px;
-  background: radial-gradient(ellipse, rgba(183,148,246,0.12) 0%, transparent 65%);
+  background: radial-gradient(ellipse, rgba(183,148,246,0.28) 0%, transparent 65%);
   pointer-events: none;
 }
 .home-hero::after {
@@ -186,7 +190,7 @@ button { font: inherit; }
   font-family: var(--fonte-codigo);
   font-size: 260px;
   font-weight: 700;
-  color: rgba(183,148,246,0.035);
+  color: rgba(183,148,246,0.07);
   line-height: 1;
   pointer-events: none;
   user-select: none;
@@ -207,12 +211,14 @@ button { font: inherit; }
   position: relative; z-index: 1;
 }
 .hero-titulo {
-  font-size: clamp(42px, 7vw, 88px);
-  font-weight: 800;
-  line-height: 1.0;
-  letter-spacing: -3px;
+  font-size: clamp(22px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -1px;
   margin-bottom: 24px;
-  background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  background: linear-gradient(135deg, #ffffff 0%, #c9b8f5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -374,7 +380,7 @@ button { font: inherit; }
   color: inherit;
 }
 .video-card:hover { border-color: var(--cor-acento); transform: translateY(-2px); }
-.video-thumb { width: 100%; aspect-ratio: 16/9; background: #0d1117; position: relative; overflow: hidden; }
+.video-thumb { width: 100%; aspect-ratio: 16/9; background: #181229; position: relative; overflow: hidden; }
 .video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .video-thumb-overlay {
   position: absolute; inset: 0;
@@ -427,7 +433,7 @@ button { font: inherit; }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(16,11,32,0.88);
   z-index: 9999;
   align-items: center;
   justify-content: center;
@@ -489,7 +495,7 @@ button { font: inherit; }
   position: absolute;
   top: -100px; right: -100px;
   width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(183,148,246,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(183,148,246,0.2) 0%, transparent 70%);
   pointer-events: none;
 }
 .secao-breadcrumb {
@@ -518,11 +524,12 @@ button { font: inherit; }
   margin-bottom: 16px;
 }
 .secao-titulo {
-  font-size: clamp(32px, 5vw, 56px);
-  font-weight: 800;
+  font-size: clamp(24px, 4.2vw, 44px);
+  font-weight: 700;
+  overflow-wrap: anywhere;
   letter-spacing: -2px;
   margin-bottom: 14px;
-  background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #c9b8f5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -807,7 +814,8 @@ button { font: inherit; }
   #nav-principal { padding: 0 16px; }
   .nav-logo-texto { display: none; }
   .home-hero { padding: 70px 20px 60px; }
-  .hero-titulo { letter-spacing: -2px; }
+  .hero-titulo { letter-spacing: -0.5px; }
+  .home-hero::after { font-size: 120px; right: -6px; }
   .home-beneficios, .home-topicos, .home-desafio, .home-videos { padding-left: 20px; padding-right: 20px; }
   .carousel-btn { display: none; }
   .secao-hero { padding: 48px 20px 36px; }
@@ -891,3 +899,11 @@ pre::-webkit-scrollbar-thumb { background: var(--cor-texto-mudo); border-radius:
 @media (max-width: 600px) {
   .secao-hero-acao, .btn-quiz { width: 100%; justify-content: center; }
 }
+
+/* ---------- Legibilidade dos cards (contraste e tamanho) ---------- */
+
+.secao-conteudo .card p { font-size: 18px; color: #cfc7e8; line-height: 1.7; }
+.card h3 { font-size: 19px; }
+.lista-itens li { color: #d4cdee; line-height: 1.7; }
+.lista-itens li::before { font-size: 19px; }
+.secao-conteudo .caixa-info p { color: #e4d8fb; }
