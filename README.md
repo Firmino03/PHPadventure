@@ -1,6 +1,6 @@
 # 🐘 PHPadventure
 
-Plataforma interativa para revisar **PHP, Laravel e MySQL** — feita para estudar os conteúdos passados em sala antes da prova, trilha por trilha e no seu próprio ritmo.
+Plataforma interativa para revisar **PHP, Laravel, MySQL e APIs** — feita para estudar os conteúdos passados em sala antes da prova, trilha por trilha e no seu próprio ritmo.
 
 > Esse projeto não é uma extensão oficial da disciplina, apenas uma forma leve e interativa de revisar o conteúdo.
 
@@ -8,8 +8,8 @@ Plataforma interativa para revisar **PHP, Laravel e MySQL** — feita para estud
 
 ## ✨ Funcionalidades
 
-- **8 trilhas de estudo**, cada uma focada em um assunto: MVC, Frameworks, Migrations, Models, ORM Eloquent, Seeders & Factories, Controllers e Views & Blade.
-- **72 perguntas** no total, de múltipla escolha, com feedback imediato e uma curiosidade explicando a resposta certa a cada questão.
+- **9 trilhas de estudo**, cada uma focada em um assunto: MVC, Frameworks, Migrations, Models, ORM Eloquent, Seeders & Factories, Controllers, Views & Blade e APIs (conceito e API do Laravel: `install:api`, `apiResource`, Resources, Form Requests, Sanctum, testes e a facade `Http`).
+- **82 perguntas** no total, de múltipla escolha, com feedback imediato e uma curiosidade explicando a resposta certa a cada questão.
 - **Desafio Relâmpago ⚡** — um modo alternativo de prática que mistura perguntas de todas as trilhas, dando mais peso aos assuntos mais extensos do site (ORM Eloquent, Views & Blade, Models e Seeders & Factories). Ao final, mostra quais trilhas valem revisão com base no seu desempenho.
 - Barra de progresso, contagem de acertos e tela de resultado ao final de cada trilha ou do desafio.
 - Layout responsivo no mesmo estilo visual do CodeLogic (tema escuro, acento lilás), com navegação por trilhas fixa no topo.
