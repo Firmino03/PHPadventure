@@ -94,7 +94,7 @@ function renderHome() {
       <div class="hero-badge">// Guia de estudos interativo</div>
       <h1 class="hero-titulo">PHPadventure</h1>
       <p class="hero-descricao">
-        Um jeito de revisar <strong>Laravel, PHP e MySQL</strong> antes da prova, respondendo às
+        Um jeito de revisar <strong>Laravel, PHP, MySQL e APIs</strong> antes da prova, respondendo às
         perguntas que o professor passou — trilha por trilha, no seu ritmo.
       </p>
       <p class="hero-sub">${TOPICS.length} trilhas · ${totalQuestions} perguntas</p>
@@ -347,7 +347,7 @@ function renderTopicGuide(topicId) {
           <span class="nivel-titulo">Na prática</span>
         </div>
         <div class="caixa-info"><div class="icone">📌</div><p>${guide.example}</p></div>
-        ${(guide.snippets || []).map((sn) => codeBlock(sn.file, sn.code)).join("")}
+        ${(guide.snippets || []).map((sn) => codeBlock(sn.file, sn.code) + (sn.note ? `<p class="snippet-nota">${sn.note}</p>` : "")).join("")}
       </div>
 
       ${guide.pitfalls ? `
