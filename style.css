@@ -604,6 +604,16 @@ button { font: inherit; }
   overflow: hidden;
   margin: 20px 0;
 }
+/* Explicação curta logo abaixo de um bloco de código */
+.snippet-nota {
+  margin: -6px 0 26px;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--cor-acento);
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
 .bloco-codigo-cabecalho {
   display: flex;
   align-items: center;
