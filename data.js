@@ -10,6 +10,7 @@ const TOPICS = [
   { id: "seeders", label: "Seeders & Factories", icon: "🌱", video: "4oxjaQCJRaA" },
   { id: "controllers", label: "Controllers", icon: "🎣", video: null },
   { id: "blade", label: "Views & Blade", icon: "🏡", video: "HOv9CqqAZk0" },
+  { id: "apis", label: "APIs", icon: "🔌", video: null },
 ];
 
 // Guia de estudo mostrado antes do quiz de cada trilha.
@@ -510,6 +511,394 @@ public function update(Request $request, Book $book)   // route model binding
       "Herança de layout, sem repetir cabeçalho e rodapé em cada página",
       "Escape automático de HTML, com proteção contra XSS por padrão",
       "É compilado e cacheado automaticamente pelo Laravel, sem perder performance",
+    ],
+  },
+
+  apis: {
+    intro:
+      "API (Application Programming Interface) é um contrato que define como um sistema pode pedir dados ou ações a outro, sem precisar conhecer como ele funciona por dentro. Na web, isso acontece por requisições HTTP: o cliente (um app mobile, um front-end em React, outro servidor) envia um pedido a um endereço (endpoint) e o servidor devolve uma resposta, quase sempre em JSON. No Laravel, uma API é a mesma aplicação que você já conhece, mas as rotas ficam em routes/api.php e, em vez de devolver uma View em HTML, o Controller devolve JSON junto com um código de status.",
+    analogy:
+      "Pense no garçom de um restaurante: você (cliente) não entra na cozinha. Você faz o pedido pelo cardápio (a documentação da API), o garçom leva até a cozinha (servidor) e volta com o prato (resposta). O cardápio é o contrato: se você pedir algo que não está nele, o garçom responde que não existe (404); se o pedido vier incompleto, ele devolve avisando o que faltou (422).",
+    concepts: [
+      { t: "Cliente × servidor", d: "O cliente faz a requisição e o servidor responde. Na API, o servidor não se importa se quem pede é um site, um app ou um terminal: todos usam o mesmo contrato." },
+      { t: "Endpoint", d: "É a URL de um recurso, como /api/books ou /api/books/1. O recurso fica no substantivo da URL (books), e a ação fica no verbo HTTP." },
+      { t: "Verbos HTTP", d: "GET lê, POST cria, PUT substitui/atualiza por completo, PATCH atualiza parcialmente e DELETE remove. É o verbo que diz o que fazer com o recurso." },
+      { t: "JSON", d: "Formato de texto leve, com pares chave/valor, que todas as linguagens entendem. É o formato padrão das respostas de uma API Laravel." },
+      { t: "Códigos de status", d: "200 OK, 201 criado, 204 sem conteúdo (ex.: após excluir), 401 não autenticado, 403 sem permissão, 404 não encontrado, 422 dados inválidos, 429 muitas requisições, 500 erro no servidor." },
+      { t: "Headers", d: "Metadados da requisição. Os principais: Accept: application/json (quero JSON de volta), Content-Type: application/json (estou enviando JSON) e Authorization: Bearer <token> (quem eu sou)." },
+      { t: "REST e stateless", d: "REST é um estilo de projetar APIs em torno de recursos e verbos HTTP. Ser stateless (sem estado) significa que cada requisição carrega tudo que o servidor precisa, inclusive o token, sem depender de sessão guardada." },
+      { t: "routes/api.php", d: "Arquivo de rotas da API. Todas ganham o prefixo /api automaticamente e passam pelo grupo de middleware api (sem sessão e sem CSRF). Desde o Laravel 11 ele não vem pronto: o comando php artisan install:api o cria." },
+      { t: "apiResource", d: "Route::apiResource('books', BookController::class) registra as 5 rotas de uma API (index, store, show, update, destroy). Diferente do resource, não cria create e edit, pois não há formulário." },
+      { t: "Controller de API", d: "Gerado com --api, tem só os 5 métodos de API. Em vez de view(), devolve JSON (resource, response()->json()) com o status adequado." },
+      { t: "API Resource", d: "Classe que transforma um Model em JSON, escolhendo os campos, formatando datas e incluindo relações só quando carregadas. Evita expor colunas que não deveriam sair." },
+      { t: "Form Request", d: "Classe própria de validação (make:request). Numa API, quando a requisição pede JSON, a falha de validação vira resposta 422 com a lista de erros por campo." },
+      { t: "Sanctum e token", d: "O Laravel Sanctum emite tokens de acesso. O cliente faz login, recebe o token e o envia em Authorization: Bearer. O middleware auth:sanctum barra quem não tiver um token válido (401)." },
+      { t: "Autenticação × autorização", d: "Autenticação responde “quem é você?” (401 se falhar). Autorização responde “você pode fazer isso?” (403 se falhar), com Policies e Gates ou abilities do token." },
+      { t: "Rate limiting e CORS", d: "O throttle limita quantas requisições cada usuário/IP faz por minuto (429 ao exceder). O CORS define quais origens de navegador, como um front-end em outro domínio, podem consumir a API." },
+      { t: "Consumir uma API externa", d: "O Laravel traz a facade Http para chamar outras APIs: Http::get(...), Http::withToken(...)->post(...), com timeout, retry e leitura da resposta com ->json()." },
+    ],
+    example:
+      "A biblioteca ganha um aplicativo mobile. Em vez de Blade, o app chama GET /api/books e recebe a lista em JSON, página por página. Para cadastrar um livro, faz POST /api/books com o token do usuário: se os dados forem inválidos, recebe 422 com os erros; se estiver tudo certo, recebe 201 com o livro criado. O back-end Laravel é o mesmo do site: muda só o formato da resposta.",
+    snippets: [
+      {
+        file: "requisição e resposta HTTP",
+        code: raw`# Requisição (cliente → servidor)
+GET /api/books/1 HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+Authorization: Bearer 1|SEU_TOKEN_AQUI
+
+# Resposta (servidor → cliente)
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "data": {
+    "id": 1,
+    "title": "Dom Casmurro",
+    "isbn": "9788535914849"
+  }
+}`,
+        note: "Toda conversa com uma API tem essas partes: verbo + URL + headers na ida; status + headers + corpo JSON na volta. O que você faz no Laravel é preencher a resposta.",
+      },
+      {
+        file: "terminal — preparando a API",
+        code: raw`# Cria routes/api.php, instala o Sanctum e a migration dos tokens
+# (a partir do Laravel 11 a API não vem habilitada por padrão)
+php artisan install:api
+
+# Executa as migrations (inclui a tabela personal_access_tokens)
+php artisan migrate
+
+# Model + migration (-m) + factory (-f) do recurso
+php artisan make:model Book -mf
+
+# Controller de API: só os 5 métodos (sem create/edit), ligado ao Model
+php artisan make:controller Api/BookController --api --model=Book
+
+# API Resource: define como o Book vira JSON
+php artisan make:resource BookResource
+
+# Form Request: validação separada do Controller
+php artisan make:request StoreBookRequest
+
+# Sobe o servidor local em http://localhost:8000
+php artisan serve
+
+# Lista só as rotas da API
+php artisan route:list --path=api`,
+        note: "Cada make: gera um arquivo no lugar certo (app/Http/Controllers/Api, app/Http/Resources, app/Http/Requests). O route:list é o jeito de conferir se as rotas foram registradas e qual middleware cada uma usa.",
+      },
+      {
+        file: "routes/api.php",
+        code: raw`use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BookController;
+use Illuminate\Support\Facades\Route;
+
+// Tudo aqui já ganha o prefixo /api. Com v1, a URL fica /api/v1/books
+Route::prefix('v1')->group(function () {
+
+    Route::post('/login', [AuthController::class, 'login']);
+
+    // Leitura pública: GET /api/v1/books e GET /api/v1/books/{book}
+    Route::apiResource('books', BookController::class)->only(['index', 'show']);
+
+    // Escrita só com token válido (auth:sanctum)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        // POST, PUT/PATCH e DELETE
+        Route::apiResource('books', BookController::class)->except(['index', 'show']);
+    });
+});`,
+        note: "O versionamento (v1) permite lançar uma v2 sem quebrar quem já usa a v1. O apiResource gera: GET /books (index), POST /books (store), GET /books/{book} (show), PUT|PATCH /books/{book} (update) e DELETE /books/{book} (destroy).",
+      },
+      {
+        file: "app/Http/Controllers/Api/BookController.php",
+        code: raw`use App\Http\Requests\StoreBookRequest;
+use App\Http\Resources\BookResource;
+use App\Models\Book;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
+class BookController extends Controller
+{
+    // GET /api/v1/books — lista paginada
+    public function index()
+    {
+        return BookResource::collection(Book::latest()->paginate(10));
+    }
+
+    // GET /api/v1/books/{book} — route model binding (404 automático)
+    public function show(Book $book)
+    {
+        return new BookResource($book);
+    }
+
+    // POST /api/v1/books — valida (StoreBookRequest) e responde 201
+    public function store(StoreBookRequest $request)
+    {
+        $book = Book::create($request->validated());
+
+        return (new BookResource($book))->response()->setStatusCode(201);
+    }
+
+    // PUT|PATCH /api/v1/books/{book}
+    public function update(Request $request, Book $book)
+    {
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'isbn'  => ['required', Rule::unique('books', 'isbn')->ignore($book->id)],
+        ]);
+
+        $book->update($data);
+
+        return new BookResource($book);
+    }
+
+    // DELETE /api/v1/books/{book} — 204 sem corpo
+    public function destroy(Book $book)
+    {
+        $book->delete();
+
+        return response()->noContent();
+    }
+}`,
+        note: "Compare com o Controller das trilhas anteriores: a lógica é a mesma, mas não há view() nem redirect(). Quem responde é o JSON, e o status mostra o resultado: 200 (padrão), 201 ao criar e 204 ao excluir.",
+      },
+      {
+        file: "app/Http/Resources/BookResource.php",
+        code: raw`use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BookResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id'         => $this->id,
+            'title'      => $this->title,
+            'isbn'       => $this->isbn,
+            // só aparece se a relação foi carregada (with('author')), evitando N+1
+            'author'     => $this->whenLoaded('author', fn () => $this->author->name),
+            'created_at' => $this->created_at?->toIso8601String(),
+        ];
+    }
+}
+
+// Resposta de BookResource::collection(Book::paginate(10)):
+// {
+//   "data": [ { "id": 1, ... }, { "id": 2, ... } ],
+//   "links": { "first": "...", "next": "...", ... },
+//   "meta":  { "current_page": 1, "per_page": 10, "total": 42, ... }
+// }`,
+        note: "O Resource é a “vitrine” do Model: só sai o que está no toArray(). Por padrão o Laravel embrulha o resultado em uma chave data; coleções paginadas ganham links e meta automaticamente.",
+      },
+      {
+        file: "app/Http/Requests/StoreBookRequest.php",
+        code: raw`use Illuminate\Foundation\Http\FormRequest;
+
+class StoreBookRequest extends FormRequest
+{
+    // Quem pode fazer esta requisição? (a autenticação já está na rota)
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'isbn'  => ['required', 'string', 'unique:books,isbn'],
+        ];
+    }
+}
+
+// Se falhar, com Accept: application/json, o Laravel responde 422:
+// {
+//   "message": "The isbn has already been taken.",
+//   "errors": { "isbn": ["The isbn has already been taken."] }
+// }`,
+        note: "O Controller só roda se a validação passar. Quando falha, o Laravel monta o 422 sozinho, com os erros agrupados por campo, pronto para o front-end exibir.",
+      },
+      {
+        file: "app/Http/Controllers/Api/AuthController.php — login e logout com Sanctum",
+        code: raw`// No Model User: use Laravel\Sanctum\HasApiTokens; e use HasApiTokens;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        $data = $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            return response()->json(['message' => 'Credenciais inválidas.'], 401);
+        }
+
+        // plainTextToken só aparece agora; no banco fica apenas o hash
+        $token = $user->createToken('app-mobile')->plainTextToken;
+
+        return response()->json(['token' => $token]);
+    }
+
+    public function logout(Request $request)
+    {
+        // revoga somente o token usado nesta requisição
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->noContent();
+    }
+}
+
+// Token com permissões (abilities) e checagem:
+// $user->createToken('leitor', ['books:read'])->plainTextToken;
+// $request->user()->tokenCan('books:read');   // true ou false`,
+        note: "Fluxo: o cliente envia e-mail e senha, o servidor confere e devolve um token. Dali em diante o cliente manda o token em cada requisição, e o auth:sanctum identifica o usuário. Credencial errada é 401.",
+      },
+      {
+        file: "terminal — testando com curl",
+        code: raw`# 1) Listar livros (rota pública)
+curl 'http://localhost:8000/api/v1/books' \
+  -H 'Accept: application/json'
+
+# 2) Login: a resposta traz o token
+curl -X POST 'http://localhost:8000/api/v1/login' \
+  -H 'Accept: application/json' \
+  -d 'email=ana@exemplo.com' -d 'password=secret123'
+
+# 3) Criar livro, enviando o token no header Authorization
+curl -X POST 'http://localhost:8000/api/v1/books' \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer 1|SEU_TOKEN_AQUI' \
+  -d 'title=Dom Casmurro' -d 'isbn=9788535914849'
+
+# 4) Excluir (resposta esperada: 204 sem corpo)
+curl -X DELETE 'http://localhost:8000/api/v1/books/1' \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer 1|SEU_TOKEN_AQUI'`,
+        note: "Sempre envie Accept: application/json. Sem ele, o Laravel entende que quem pede é um navegador e, ao falhar na validação ou na autenticação, redireciona ou devolve HTML em vez de JSON. O Postman e o Insomnia fazem o mesmo papel do curl com interface gráfica.",
+      },
+      {
+        file: "bootstrap/app.php — erros sempre em JSON na API",
+        code: raw`use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+->withExceptions(function (Exceptions $exceptions) {
+    // Livro inexistente (route model binding) vira 404 em JSON
+    $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+        if ($request->is('api/*')) {
+            return response()->json(['message' => 'Recurso não encontrado.'], 404);
+        }
+    });
+})`,
+        note: "Padronizar a mensagem de erro ajuda quem consome a API. O if separa o que é API (api/*) do que é página Blade, que continua com a tela de erro normal.",
+      },
+      {
+        file: "limite de requisições e CORS",
+        code: raw`// app/Providers/AppServiceProvider.php — método boot()
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
+
+RateLimiter::for('api', function (Request $request) {
+    // 60 requisições por minuto, por usuário (ou por IP se for anônimo)
+    return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+});
+
+// routes/api.php — aplica o limite
+Route::middleware('throttle:api')->group(function () {
+    // ...rotas
+});
+
+// terminal: publica config/cors.php para liberar o front-end de outro domínio
+// php artisan config:publish cors
+// em config/cors.php: 'paths' => ['api/*'], 'allowed_origins' => ['http://localhost:5173']`,
+        note: "Ao exceder o limite, o cliente recebe 429 Too Many Requests. O CORS é uma regra do navegador: sem liberar a origem do seu front-end (como o Vite em localhost:5173), ele bloqueia a resposta mesmo que a API esteja certa.",
+      },
+      {
+        file: "tests/Feature/BookApiTest.php",
+        code: raw`use App\Models\Book;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+
+class BookApiTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_lista_livros(): void
+    {
+        Book::factory()->count(3)->create();
+
+        $this->getJson('/api/v1/books')
+             ->assertOk()
+             ->assertJsonCount(3, 'data');
+    }
+
+    public function test_cria_livro_autenticado(): void
+    {
+        Sanctum::actingAs(User::factory()->create());
+
+        $this->postJson('/api/v1/books', ['title' => 'Dom Casmurro', 'isbn' => '9788535914849'])
+             ->assertCreated()
+             ->assertJsonPath('data.title', 'Dom Casmurro');
+    }
+
+    public function test_cria_livro_sem_token_retorna_401(): void
+    {
+        $this->postJson('/api/v1/books', [])->assertUnauthorized();
+    }
+}
+
+// terminal: php artisan make:test BookApiTest   e depois   php artisan test`,
+        note: "getJson, postJson, putJson e deleteJson já enviam o header Accept: application/json. O Sanctum::actingAs simula um usuário logado sem precisar gerar token.",
+      },
+      {
+        file: "consumindo uma API externa com Http",
+        code: raw`use Illuminate\Support\Facades\Http;
+
+$response = Http::withToken($token)      // Authorization: Bearer
+    ->acceptJson()                       // Accept: application/json
+    ->timeout(10)                        // desiste após 10 segundos
+    ->get('https://api.exemplo.com/books', ['page' => 1]);
+
+if ($response->successful()) {           // status 2xx
+    $books = $response->json('data');    // lê a chave data do JSON
+}
+
+$response->throw();                      // lança exceção se for 4xx ou 5xx
+
+// Enviando dados (POST com corpo JSON)
+Http::post('https://api.exemplo.com/books', ['title' => 'Dom Casmurro']);`,
+        note: "Aqui o seu Laravel é o cliente: ele chama a API de outro sistema (pagamento, CEP, clima). Os mesmos conceitos valem, mas agora você monta a requisição e lê a resposta.",
+      },
+    ],
+    pitfalls: [
+      "Sem o header Accept: application/json, erros de validação e de autenticação viram redirecionamento ou HTML em vez de JSON (422/401). É o motivo mais comum de “a API não funciona no Postman”.",
+      "Route::apiResource() não cria create nem edit: API não tem formulário. Já o Route::resource() cria as 7 rotas.",
+      "Desde o Laravel 11, routes/api.php não existe até você rodar php artisan install:api.",
+      "As rotas de routes/api.php já têm o prefixo /api. Declarar Route::get('/api/books') ali geraria /api/api/books.",
+      "Rotas da API são stateless: não usam sessão nem token CSRF. O @csrf do Blade não se aplica, e quem identifica o usuário é o token no header Authorization.",
+      "Devolver o Model direto (return $book) expõe todas as colunas. Use um API Resource (ou $hidden) para controlar o que sai.",
+      "401 e 403 não são a mesma coisa: 401 é “não sei quem você é” (sem token ou token inválido); 403 é “sei quem você é, mas não pode fazer isso”.",
+      "O token do Sanctum só é mostrado uma vez, na criação. Quem perde precisa gerar outro, e quem vaza deve ter o token revogado.",
+      "Autenticar não é autorizar: o auth:sanctum só confirma que há um usuário. Quem decide se ele pode editar aquele livro são as Policies, Gates ou abilities.",
+      "Escolha o status certo: 201 ao criar, 204 ao excluir, 404 quando não existe e 422 quando os dados são inválidos. Devolver 200 para tudo dificulta a vida de quem consome.",
+    ],
+    benefits: [
+      "Um único back-end atende site, app mobile e outros sistemas, trocando só o formato da resposta",
+      "Front-end e back-end evoluem separados (React, Vue, Angular ou mobile consomem o mesmo contrato)",
+      "O Laravel entrega o essencial pronto: apiResource, Resources, Form Requests, Sanctum, rate limiting e testes",
+      "Padrões como verbos HTTP e códigos de status tornam a API previsível e fácil de documentar",
+      "Permite integrar o seu sistema com serviços externos, como pagamento, CEP e e-mail",
     ],
   },
 };
@@ -1219,6 +1608,114 @@ const QUESTIONS = {
       ],
       correct: 0,
       curiosity: "forelse percorre a coleção e empty define o conteúdo exibido quando não há registros.",
+    },
+  ],
+
+  apis: [
+    {
+      question: "O que é uma API, no contexto de aplicações web?",
+      options: [
+        "Um banco de dados que guarda as informações do sistema",
+        "Um contrato que permite a um sistema pedir dados ou ações a outro por requisições, sem conhecer sua implementação interna",
+        "Uma linguagem de programação usada para criar o back-end",
+        "Um motor de templates que gera o HTML da página",
+      ],
+      correct: 1,
+      curiosity: "A API define o que pode ser pedido, como pedir e o que será devolvido. Quem consome não precisa saber se o servidor usa Laravel, MySQL ou outra tecnologia.",
+    },
+    {
+      question: "Qual verbo HTTP costuma ser usado para criar um recurso, e qual status indica que ele foi criado?",
+      options: [
+        "GET e 200",
+        "DELETE e 204",
+        "POST e 201",
+        "PATCH e 404",
+      ],
+      correct: 2,
+      curiosity: "POST cria e 201 (Created) confirma a criação. GET lê, PUT/PATCH atualizam e DELETE remove, normalmente com 204 (sem conteúdo).",
+    },
+    {
+      question: "O que o Route::apiResource('books', BookController::class) registra?",
+      options: [
+        "As 7 rotas de um CRUD, incluindo create e edit",
+        "Apenas as rotas de leitura (index e show)",
+        "As 5 rotas de uma API (index, store, show, update e destroy), sem create e edit",
+        "Rotas, Views e migrations do recurso books",
+      ],
+      correct: 2,
+      curiosity: "Numa API não existe formulário, então create e edit ficam de fora. Como no resource, ele cria só as rotas, não gera Views nem migrations.",
+    },
+    {
+      question: "A partir do Laravel 11, um projeto novo já vem com o arquivo routes/api.php pronto, sem precisar de nenhum comando.",
+      options: ["Verdadeiro", "Falso"],
+      correct: 1,
+      curiosity: "É preciso rodar php artisan install:api. Ele cria routes/api.php, instala o Sanctum e publica a migration da tabela de tokens.",
+    },
+    {
+      question: "Qual comando gera um controller de API, com apenas os 5 métodos e já ligado ao Model Book?",
+      options: [
+        "php artisan make:controller Api/BookController --api --model=Book",
+        "php artisan make:api BookController",
+        "php artisan make:resource BookController --api",
+        "php artisan route:api Book",
+      ],
+      correct: 0,
+      curiosity: "A flag --api omite create e edit, e --model=Book liga o controller ao Model (injeção no show, update e destroy). Já o make:resource cria um API Resource, não um controller.",
+    },
+    {
+      question: "Para que serve uma API Resource (classe que estende JsonResource)?",
+      options: [
+        "Para registrar rotas de API automaticamente",
+        "Para validar os dados que chegam na requisição",
+        "Para transformar um Model em JSON, escolhendo quais campos saem e como são formatados",
+        "Para criar tokens de acesso para os usuários",
+      ],
+      correct: 2,
+      curiosity: "No toArray() você define o JSON que a API devolve. Assim colunas internas não vazam, e relações só entram quando carregadas (whenLoaded). A validação fica com o Form Request.",
+    },
+    {
+      question: "Por que, ao testar a API no Postman ou no curl, é importante enviar o header Accept: application/json?",
+      options: [
+        "Sem ele, a requisição é bloqueada pelo CORS",
+        "Sem ele, o Laravel pode tratar a requisição como de navegador e redirecionar ou devolver HTML em vez do 422/401 em JSON",
+        "Sem ele, o banco de dados não é consultado",
+        "Ele substitui o token de autenticação",
+      ],
+      correct: 1,
+      curiosity: "O Laravel usa o Accept para decidir o formato do erro. Sem ele, uma validação que falha costuma resultar em um redirecionamento (302) para a página anterior.",
+    },
+    {
+      question: "Associe cada situação ao status HTTP mais adequado: sem token, livro inexistente, dados inválidos e usuário autenticado sem permissão.",
+      options: [
+        "403, 422, 404 e 401",
+        "422, 401, 403 e 404",
+        "401, 404, 422 e 403",
+        "404, 403, 401 e 422",
+      ],
+      correct: 2,
+      curiosity: "401 = não autenticado, 404 = recurso não encontrado, 422 = falha de validação e 403 = autenticado, mas sem permissão (autorização).",
+    },
+    {
+      question: "Como o cliente envia o token do Sanctum, e qual middleware protege a rota?",
+      options: [
+        "Num campo escondido @csrf; middleware csrf",
+        "Na URL, como /api/books/{token}; middleware throttle",
+        "No corpo do HTML da página; middleware web",
+        "No header Authorization: Bearer <token>; middleware auth:sanctum",
+      ],
+      correct: 3,
+      curiosity: "O cliente manda Authorization: Bearer <token> a cada requisição. O auth:sanctum valida o token e, se for inválido ou ausente, responde 401.",
+    },
+    {
+      question: "Como o Laravel pode consumir uma API de outro sistema, enviando um token e lendo a resposta em JSON?",
+      options: [
+        "Com Route::apiResource() apontando para a URL externa",
+        "Com Http::withToken($token)->acceptJson()->get($url) e depois $response->json()",
+        "Com php artisan install:api informando o endereço do outro sistema",
+        "Com @include('https://api.exemplo.com') dentro do Blade",
+      ],
+      correct: 1,
+      curiosity: "A facade Http é um cliente HTTP embutido: tem withToken, timeout, retry, throw, successful() e json(). Aqui o seu Laravel é o cliente, e não o servidor da API.",
     },
   ],
 };
